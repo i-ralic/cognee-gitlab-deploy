@@ -112,6 +112,23 @@ services:
           # Measured peak 3.5 GiB on a 134-document sync (see README "Resources").
           memory: ${SYNC_MEM_LIMIT:-5g}
 
+  # Offline stand-in for gitlab.com (profile "offline", never starts with plain `up`): serves
+  # fixtures/offline-corpus.json as GitLab API v4, re-read on every request, so the
+  # edit / add / delete re-sync can be verified with no gitlab.com account. See README
+  # "Reproduce the appendix offline" and scripts/fake_gitlab.py.
+  fake-gitlab:
+    image: python:3.12-slim
+    profiles: ["offline"]
+    command: ["python", "/app/scripts/fake_gitlab.py", "serve", "--corpus", "/data/offline-corpus.json", "--port", "8080"]
+    volumes:
+      - ./scripts:/app/scripts:ro
+      - ./fixtures:/data
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/api/v4/projects/1/issues?per_page=1')"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
 volumes:
   pg_data:
   cognee_storage:

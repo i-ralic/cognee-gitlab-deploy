@@ -196,3 +196,32 @@ state the reason]`. The main corpus (`inkscape/vectors/content`, sections 1 to 6
 project and reproduces as described. To re-run this appendix, seed a project under an
 established account and pace the seed script (`--sleep 5`), or run against a self-hosted
 instance via `GITLAB_URL`.
+
+**Re-verified offline (05.10, after the block).** Because the seeded project can no longer be
+read, the same three-sync sequence was re-run against `scripts/fake_gitlab.py`, a stand-in that
+serves `fixtures/offline-corpus.json` as GitLab API v4 inside the compose network (README,
+"Reproduce the appendix offline"). Same connector image, same stack, dataset `gitlab_offline`,
+24 documents (19 issues + 5 merge requests from the public project, no comments). Counts are
+scoped to the dataset via `graph_node.source_dataset_ids` (`scripts/graph_report_dataset.sql`).
+
+| | Sync 1 (fresh) | `fake_gitlab.py mutate` | Sync 2 | Sync 3 |
+|---|---|---|---|---|
+| Connector log | 19 + 5 changed, 0 deleted | edit #39, add #120, delete #119 | **Issue: 2 changed, 1 deleted** | 0 changed, 0 deleted |
+| cognee | | | "Deleting 2 orphaned dlt row(s)" | |
+| Wall / sync peak RSS | 41 s / 2.8 GiB | | 12 s / 0.8 GiB | 3 s / 0.15 GiB |
+| Staging rows (issues / MRs) | 19 / 5 | | 19 / 5; id of #119 gone, id of #120 present | 19 / 5 |
+| TextDocument / DocumentChunk | 24 / 31 | | 24 / 29 | 24 / 29 |
+| Entity | 258 | | 225 | 225 |
+| Nodes / edges (dataset-scoped) | 353 / 991 | | **316 / 887** | 316 / 887 |
+| Entity-entity relations | 211 | | 192 | 192 |
+
+What the graph did, same as on gitlab.com: the deleted issue's chunks in this dataset: **0**;
+the add marker produced `quokka palette is_a feature`, `mira kovac is_a person`; the edit marker
+produced `collabwriting hosts zagreb hackfest 2026`, `zagreb hackfest 2026 held_in lauba hall`,
+`lauba hall is_a location`, plus the same over-read `collabwriting sponsors zagreb hackfest 2026`.
+`recall()` with `datasets=["gitlab_offline"]`: the Quokka sentence ranks 2 (rank 1 is the
+*other* dataset's copy from the gitlab.com run, so the "search ignores the datasets filter with
+access control off" finding reproduces); "Where is the Zagreb Hackfest 2026 held?" is again not in
+the top 5; the deleted issue's title still returns copies from the two earlier datasets, none from
+this one. The sync 2 peak (0.8 GiB vs 3.0 GiB on gitlab.com) is lower because the two changed
+documents here are short and have no comments, so GLiNER scores a handful of chunks.

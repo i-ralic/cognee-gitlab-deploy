@@ -1,0 +1,427 @@
+{
+ "source": "inkscape/vectors/content",
+ "captured_at": "2026-10-05T18:51:03.000Z",
+ "issues": [
+  {
+   "id": 186711437,
+   "iid": 119,
+   "title": "Libre Graphic Meeting 2026 - Inkscape project notes",
+   "state": "closed",
+   "description": "## Synopsis\n\nThe annual [LibreGraphics Meeting](https://libregraphicsmeeting.org/ \"https://libregraphicsmeeting.org/\") (LGM) conference 2026 will take place in may 22th. The opening presentation at LGM is an update from the many software, curation, publication and umbrella projects of our Libre Graphics community.\n\nThe submission repository and instructions is located [here](https://github.com/libregraphicsmeeting/state-of-lg-2026 \"https://github.com/libregraphicsmeeting/state-of-lg-2025\"). its same as [last year](https://gitlab.com/inkscape/vectors/content/-/work_items/118), just looking for a changelog of all the cool things Inkscape has been up to, and what to look forward to on the roadmap. To give time for assembly, please **have the slides in before April 15st, ideally April 1st**, preferably before, the earlier the easier for me.\n\nSee 3 slides (layout drafts at this point) in attachment : splashscreen, update since 2025, and what's coming next.\n\n# Inkscape project notes for Libre Graphic Meeting 2026\n\nInkscape is an open source vector editor, working on the SVG standard (Scalable Vector Graphics). The project started in 2003 and is still in excellent health 22 years later, thanks to its very active community of users, contributors and developers.\n\nNew major versions are released every 1 or 2 years since 2019, with minor releases every 6 months or so.\n\n## For the 2025-2026 period\n\n### Inkscape core\n\n* areWe released v.1.4.2 in May 2025, the last version is currently 1.4.3 available since Dec. 2025. A v1.4.4 is on the way and is currently planned for May.\n* Relases focused on bugfixes (about 200+), many improvements around import/export file formats: fix JPEG export issue on Windows, various fixes for PDF, improved support for Affinity Designer and initial support for Vectornator/Linearity Curve files, and many more! Noticeable work has been done on translations and documentation.\n\n### Project, community and infrastructure\n\n- Inkscape took part in the IndiaFOSS 2025 conference. We had a booth where visitors could try Inkscape, learn more about the difference between vector and raster images and even participate in drawing a community conference doodle!\n- Inkscape user, designer and short film artist Jorge del Campo Andrade used Inkscape in his process of creating the shortfilm \"Ladrón de Flores\", and talked to us about his experience of taking part in the Peru-based international children's film festival \"Mi primer festival\".\n-  Work on updating our website continues, as well as our endeavours to move our chat from Rocket.chat to Matrix.\n- Donations: we are working on expanding donations options to include Stripe, and to publish a \"donation\" version on Steam, etc.\n- Like many FLOSS projects, we have concerns about AI-driven developments: maintaining quality and sustainability in the Inkscape codebase and the whole community opens many questions. An AI policy is currently being drafted to give a clear frame within the project.\n\n## For Inkscape 1.5 and beyond\n\nBackground work continues for version 1.5. In the next major version, a special focus will be on:\n\n- stabilizing the GTK4 port (Inkscape has been on GTK3 since Inkscape 1.0).\n- support for color spaces, including CMYK rendering and native print-ready PDF export. This involves a huge rework of the internals of Inkscape, much has already been done, work continues.\n- hiring 3 persons (2 C++ devs + 1 issue admin) to give a boost to bugfixing for the big release.\n- UI/UX improvements: the UX + Developer teams are working hard to redesign panels, tools, iconset, etc. for next major version. Some refactoring is also in the works for 1.5 for grids, autosave/recent files, and multipage (a quite fresh feature in Inkscape, intended to evolve into a more standard element, e.g. for PDF multipage compatibility).\n\n**P.S.** : As last year, those slides were 100% made in Inkscape, including layout, artwork and backgrounds. Even icons you can see in the Inkscape screenshot ;).\n\nCredits : Karl (robot on 1st page) by Andrew Wesley, various backgrounds by m1981\n\nFont:\n\n* Titles : Unbounded (SIL OFL 1.1) https://fonts.google.com/specimen/Unbounded\n* Texts : Roboto (SIL OFL 1.1) https://fonts.google.com/specimen/Roboto",
+   "labels": [],
+   "author": {
+    "username": "m-1981"
+   },
+   "created_at": "2026-03-21T21:23:41.240Z",
+   "updated_at": "2026-08-08T15:40:59.225Z",
+   "web_url": "https://gitlab.com/inkscape/vectors/content/-/work_items/119",
+   "source_branch": null,
+   "target_branch": null,
+   "notes": []
+  },
+  {
+   "id": 167021758,
+   "iid": 117,
+   "title": "1.4.2 release article",
+   "state": "closed",
+   "description": "Here is a draft of article for Inkscape 1.4.2 release.\n\n---\n\nTitle:\n\n# 2-in-1 release – Inkscape 1.4.2 is out!\n\nIllustration: see attachments in design section + svg source in comments.\n\nSource : [_Draw your world_](https://inkscape.org/~KessM/%E2%98%85draw-your-world) by [_Kess_](https://inkscape.org/~KessM/)\n\n---\n\nContent:\n\nThe first release since Inkscape 1.4 is here! No mistake, you didn't miss 1.4.1. Due to some bug fixing delays, 1.4.1 and 1.4.2 were merged. \n\nWith about 50 bug fixes and some new features around file format support, this release was worth waiting for.\n\nHere's a summary of what to expect from the new release:\n\n+ A new splash screen, providing a visual cue while Inkscape loads in the background\n+ Initial support for import of Vectornator / Linearity Curve files\n+ A new extension to clean up paths\n+ Improved Affinity Designer files (.afdesign) import\n+ Improvements to Boolean operations\n+ 18 crash/freeze fixes, many of which affected PDF import\n+ and over 30 more bug fixes!\n\nFor more detailed information on the changes in version 1.4.2 available in the [release notes](https://wiki.inkscape.org/wiki/Release_notes/1.4.2).\n\nAgain, thanks to all Inkscape users and contributors for their support in identifying and flagging these critical issues for us through sending bug reports for our volunteer developers to examine and solve.\n\nShould you experience an issue while using Inkscape, please let us know! We've put together a [step-by-step video](https://www.youtube.com/watch?v=5-jHXlLAMjE) to help you post it on Gitlab.\n\nBuilt with the power of a team of mostly volunteers, this open source vector graphics editor represents the combined efforts, passion and work of many hearts and hands from around the world, ensuring that Inkscape remains available free for everyone to download and enjoy.\n\nIf you'd like to contribute to the project, you are more than welcome in our project's global community! You'll find the list of ways to connect with us [here](https://inkscape.org/community/).\n\nYou can also help Inkscape to stay alive and evolve by making a [donation](https://inkscape.org/support-us/donate/)\n\nGet Inkscape 1.4.2 for Linux, Windows or macOS!\n\nDraw Freely.",
+   "labels": [],
+   "author": {
+    "username": "m-1981"
+   },
+   "created_at": "2025-05-03T23:42:27.760Z",
+   "updated_at": "2026-03-21T21:39:39.935Z",
+   "web_url": "https://gitlab.com/inkscape/vectors/content/-/work_items/117",
+   "source_branch": null,
+   "target_branch": null,
+   "notes": []
+  },
+  {
+   "id": 167506063,
+   "iid": 118,
+   "title": "Libre Graphic Meeting 2025 - Inkscape project notes",
+   "state": "closed",
+   "description": "## Synopsis\n\nThe annual [LibreGraphics Meeting](https://libregraphicsmeeting.org/ \"https://libregraphicsmeeting.org/\") (LGM) conference 2025 will take place in may 28th. The opening presentation at LGM is an update from the many software, curation, publication and umbrella projects of our Libre Graphics community.\n\nThe submission repository and instructions is located [here](https://github.com/libregraphicsmeeting/state-of-lg-2025 \"https://github.com/libregraphicsmeeting/state-of-lg-2025\"). Basically, we're just looking for a description, what cool things the Inkscape team has been up to this year, and anything cool to look forward to in the future! Bonus points, would be fun, slides for Inkscape could be created using Inkscape ofc. To give time for assembly, please **have the slides in before May 21st**, preferably before, the earlier the easier for me.\n\nSee 3 slides in attachment : splashscreen, update since 2024, and what's coming next.\n\n# Inkscape project notes for Libre Graphic Meeting 2025\n\nInkscape is an open source vector editor, working on the SVG standard (Scalable Vector Graphics). The project started in 2003 and is still in excellent health 21 years later, thanks to its very active community of users, contributers and developpers\n\nNew major versions are released every 1 or 2 years since 2019, with minor releases every 6 months or so.\n\n## For the 2024-2025 period\n\nv.1.4 were release in oct. 2024 and the first update 1.4.2 is available since may 2025. Some highlights on the work done for these :\n\n- Inkscape improved support of other vector file formats : enhanced PDF conversion, Inkscape now better handles Affinity Designer and Vectornator/Linearity. In spirit of FOSS, we work to keep files editable after leaving proprietary or abandoned softwares.\n- Tools : shapebuilder now handles direct bitmap picture clipping, a new modular grid to ease layouts works is now available + more control on axonometric grids.\n- UI : a new font browser panel, including preview and collection management. Filters now have a gallery that should help to better understand their effect before apply them. The object properties panel can now also be used to modify the controls of special objects such as rectangles, ellipses, stars, ect. and is a first step towards a deeper reworking of the properties panel.\n- Great work were made around stability, with more than 200 bugs fixed since the last1.3.2 version.\n\n\n## Project, community and infrastructure (not a slide)\n\n- Regular meetings for developpers started in May 2025\n- We have a new webserver, using Weblate, where Inkscape can be translated online : translate.inkscape.org\n- Work started for future version of Inkscape website\n- Matrix currently in test to replace Rocket.chat\n\n## For next 1.5 and beyond\n\nIn the next major version, a special focus will be on :\n\n- Porting Inkscape on GTK4 (currently in GTK3 since Inkscape 1.0)\n- A huge work already done and still in progress on color profile support, a feature closely intertwined with the full PDF support.\n- This year again, Inkscape takes part to the Google Summer Of Code. As in 2024, the project also runs a bugfix accelerator paid program, to tackle some long term problems.\n- As mentioned earlier, a deep rework on tab management and dialog is on the table : optimize space side panels take, make object properties more context sensitive, more logic and fluid for newcomer and seasoned users.\n\n**P.S.** : Those slides were 100% made in Inkscape, including layout, artwork and backgrounds. Even icons you can see in the Inkscape screenshot ;).",
+   "labels": [],
+   "author": {
+    "username": "m-1981"
+   },
+   "created_at": "2025-05-18T20:03:10.706Z",
+   "updated_at": "2026-03-21T21:24:06.173Z",
+   "web_url": "https://gitlab.com/inkscape/vectors/content/-/work_items/118",
+   "source_branch": null,
+   "target_branch": null,
+   "notes": []
+  },
+  {
+   "id": 18183342,
+   "iid": 44,
+   "title": "How to contribute to Inkscape UX",
+   "state": "opened",
+   "description": "Stolen from @doctormo on Rocket.chat:\n\n## Synopsis\nFrom a design/UX perspective, you start from a really weak position. No direct relationships with any developers, no proven open source design work and a ton of ideas which will scare the living snot out of developers. I've seen the wonderful, amazing designs and ideas flow in this channel, and this is exactly what this kind of channel if for. But there is a *And what do I do now* part of the design process in an open source context. \n\n\n0. Step zero, `Pick the one` - Choose *one* design change you really want to make. Pick something small and something that seems innocuous to start with. Like the position of existing buttons.\n1. Step one, `Put on crown of leadership` - Write an issue in the GitLab issue tracker with your initial proposal, include screenshots. Make it clear that you're not just throwing this over the wall and will stick to the issue until it's programmed. You are the leader, so you should keep on top of things.\n1. Step two, `Stomp Toe Test` - Post the issue to the mailing list (and chat if needed) to see if anyone squeals in pain. People may comment, not all of it will be threading on toes stuff. Modify the design if needed to accommodate the consensus of the community but...\n1. Step three, `Don Girdle of hope` - You may get negative comments if they're not relevant or are mostly about the opinions of other people. You need to be strong enough to resist the temptation to give in to people telling you it can't be done, or shouldn't be done, or there are more important things to do. Some design changes need more armor than others. Be open to people joining you, but ask that they commit real work and not just opinion if it looks like it's dragging on.\n1. Step four, `Raise the banner` - You need to find a developer to make your design a reality, if a programmer hasn't been seduced by your initial proposal, this is where you can expand on the design. Make decisions (proactively) and generally try to provide as much of the non-programming work that's possible. Develop relationships with developers, buy them beers (or whatever) at hackfests and generally schmooz the living hell out of people. You may also hire someone personally or talk to the board about doing some kind of funding project if you think that is a realistic proposition (but a funding project is another project you'd be expected to be a leader in). You can also find it useful to learn which developers have worked on features in that area before.\n1.Step five - `March to victory` - You need to keep on top of the developer and check in every so often (not too often) but just to see how long things might take and etc. Until the feature is in and you can test it and others can test it. Small changes can get to this point quite quickly.\n1. Step six - `Defend the castle` As new releases come around, you may need to make sure your change is kept around or isn't forgotten. So make sure it's merged into master and that any problems are being dealt with. \n\n## Audience\nDesigners, UX, UI\n\n## Title\n* How to contribute to Inkscape UX\n* Introduction for designers on contributing to open source projects\n\n## Author\nMartin @doctormo \nEditor/ghost-writer: @zigzagmlt \n\n## Publication Channels\n<!-- remove spaces between @ and name when it's time to distribute the tasks -->\n\n* [ ] Website\n* [ ] Twitter post ( @ ryangorley )\n* [ ] Facebook group post ( @ t1mj0nes )\n* [ ] Mastodon post ( @ ryangorley )\n* [ ] Forums ( @ brynn or @ Lazur )\n* [ ] google+ ( @ prokoudine, @ ryangorley or @ CRogers )\n* [ ] deviantArt ( @ doctormo or @ Lazur )\n* [ ] openClipart ( @ Lazur )",
+   "labels": [
+    "Unpublished Draft",
+    "Writing"
+   ],
+   "author": {
+    "username": "prkos"
+   },
+   "created_at": "2019-02-12T20:43:02.645Z",
+   "updated_at": "2025-03-14T16:00:46.077Z",
+   "web_url": "https://gitlab.com/inkscape/vectors/content/-/work_items/44",
+   "source_branch": null,
+   "target_branch": null,
+   "notes": []
+  },
+  {
+   "id": 154324004,
+   "iid": 116,
+   "title": "Proposal Poll - Favorites for Monthly challenges",
+   "state": "opened",
+   "description": "## Context\n\nEach month, a new challenge is organized in this section of forum : https://inkscape.org/forums/competitions/\n\nMany cool designs in those challenges would deserve more visibility :\n\n- For artists : give one more reason to participate, explain their design process and symbolically award in visibility time they spend.\n- For Inkscape Project : identify some designs to illustrate on website and socials how powerful and versatile Inkscape can be in hands of creative persons.\n\nHere's a proposal to select them.\n\n## Process\n\n* At the opening of a new monthly challenge \\> a new issue is opened here to handle votes and discussions around entries.\n* During month \\> Members can already pick up designs, and discuss on why these are relevant. Examples of criteria :\n  * Originality and theme alignment\n  * Technics used\n  * Cleanliness of execution\n  * Mastering and coherence in design choices\n  * Usability in promotional terms\n* At the end of the month \\> When challenge period is closed, a selection of potential runner-up is added to the poll and vote time begins.\n* During the next month \\> Vectors meeting last votes are performed and a winner is chosen by Vectors attendee. Announce of results can be done after the end of the meeting.\n\n## Miscelleanous\n\n* Challenge rules should include same kind of mentions as about screen challenge in order the winner ones can be reused in publications outside the forum.\n* Challenger should be encouraged to tell more about technics they used\n* Need some tests with Gitlab poll system to find the best way to perform votes on multiple images/options within a single issue",
+   "labels": [],
+   "author": {
+    "username": "m-1981"
+   },
+   "created_at": "2024-10-06T19:30:29.213Z",
+   "updated_at": "2024-11-02T19:08:40.104Z",
+   "web_url": "https://gitlab.com/inkscape/vectors/content/-/work_items/116",
+   "source_branch": null,
+   "target_branch": null,
+   "notes": []
+  },
+  {
+   "id": 123051540,
+   "iid": 108,
+   "title": "Social Media Campaign for Inkscape 1.3 About Screen Contest starting Feb. 5, 2023",
+   "state": "closed",
+   "description": "## Synopsis\nThis is the social media campaign issue for the 1.3 About Screen Contest. Posts to be sent out through the various social media channels will be posted here on a regular basis throughout the campain. Contributors will be tagged here and a quick message will be sent via Vectors chat channel. Please remember to signal / confirm that you've posted the content each time.\n\n## Publication Channels\n<!-- remove spaces between @ and name when it's time to distribute the tasks -->\n\n* [ ] Website (@ zigzagmlt, @ Moini)  \n* [ ] Twitter post (@ zigzagmlt, @ ryangorley)\n* [ ] Facebook group post (@ t1mj0nes, @ SoniaB)\n* [ ] Official Facebook channel (@ ScislaC)\n* [ ] German Facebook group (@ diebasis72)\n* [ ] Instagram (@ t1mj0nes, @ ScislaC )\n* [ ] Mastodon post (@ Moini, @ ryangorley)\n* [x] Forums (@ z3z, @ pacer)\n* [x] deviantArt (@ crogers, @ Lazur)\n* [ ] Discord (@ nickmaleki)",
+   "labels": [
+    "In Progress"
+   ],
+   "author": {
+    "username": "zigzagmlt"
+   },
+   "created_at": "2023-02-04T16:36:38.288Z",
+   "updated_at": "2024-02-12T18:20:13.173Z",
+   "web_url": "https://gitlab.com/inkscape/vectors/content/-/work_items/108",
+   "source_branch": null,
+   "target_branch": null,
+   "notes": []
+  },
+  {
+   "id": 133207976,
+   "iid": 115,
+   "title": "Poll: Improve interoperability with LibreOffice",
+   "state": "opened",
+   "description": "<!-- This is for *short* news items to be added to the main website -->\n\n## Title / Content\n\n> How can we improve interoperability between Inkscape and LibreOffice?\n>\n>Let us know in the replies ⬇️\n\nIf you need additional filler content: \"Tell us about your workflows combining LibreOffice applications and Inkscape. What works well for you, what doesn't? We are always looking to make collaboration with other Free and Open Source applications easier for you!\"\n\n## Sharepic\n\nprovided by Archie on chat\n\nPNG: [LOfeedback_Archie](/uploads/8e0a1abc2ebc7a929b47cb3bd9a7bcc5/LOfeedback_Archie.png)\n\nSVG: [LOfeedback_Archie_Vertical_Black_White.svg](/uploads/ca8ce13bdef0dc2458aba467b67131ef/LOfeedback_Archie_Vertical_Black_White.svg)\n\n## Results collection\n\nI'll collect results here: https://office.inkscape.org/nextcloud/index.php/s/mDyAA6rjMgPPtHg - it's editable for everyone with an office account here: https://office.inkscape.org/nextcloud/index.php/f/28081\n\n## Additional Publication Channels\n<!-- remove spaces between @ and name when it's time to distribute the tasks -->\n\n* [x] Twitter post ( @prkos )\n* [ ] Facebook group post ( @ CRogers ) ?\n* [x] Mastodon post ( @Moini )\n* [x] Forums ( @Lazur or @pacecraft )\n* [x] deviantArt ( @Lazur )\n* [x] facebook (@Lazur )",
+   "labels": [],
+   "author": {
+    "username": "joneuhauser"
+   },
+   "created_at": "2023-09-04T12:39:47.730Z",
+   "updated_at": "2023-10-06T22:04:41.497Z",
+   "web_url": "https://gitlab.com/inkscape/vectors/content/-/work_items/115",
+   "source_branch": null,
+   "target_branch": null,
+   "notes": []
+  },
+  {
+   "id": 131187413,
+   "iid": 114,
+   "title": "Youtube video - New Pattern",
+   "state": "opened",
+   "description": "## Synopsis\nI would like to propose that we use youtube channels more. \nI want to produce a video about the new pattern editor to test this idea. Vide should would show how to use pattern editor in realistic way by  creating paceging design for Soda.\n \nQuality and style  will aime for this kind of video :\nhttps://www.youtube.com/watch?v=1kEcvVayI4Y&t\n\n## Audience\nExisting users of inskcaape who wants to see a new feature\nDesigners who want to use Patterns in tier designs.\nPackage designer\n\n## Title\n- How to use Patterns in Inkscape 1.3 \n- Introduction to Patterns in Inkscape\n- Use Inkscape Patterns for paceging design\n\n## Author\n@adam.belis \n\n## Publication Channels\n<!-- remove spaces between @ and name when it's time to distribute the tasks -->\n* [ ] Youtube\n* [ ] Website\n* [ ] Twitter ( @ prkos )\n* [ ] Facebook group ( @ CRogers )\n* [ ] Mastodon post ( @ Moini )\n* [ ] Forums ( @ Lazur or @ pacecraft )\n* [ ] deviantArt ( @ Lazur )\n* [ ] facebook (@ Lazur )\n* [ ] German Facebook group (@ diebasis72)\n* [ ] Discord (@ nickmaleki )",
+   "labels": [],
+   "author": {
+    "username": "adam.belis"
+   },
+   "created_at": "2023-07-22T12:15:42.068Z",
+   "updated_at": "2023-07-22T13:13:23.785Z",
+   "web_url": "https://gitlab.com/inkscape/vectors/content/-/work_items/114",
+   "source_branch": null,
+   "target_branch": null,
+   "notes": []
+  },
+  {
+   "id": 127614433,
+   "iid": 113,
+   "title": "Contributor T-Shirts",
+   "state": "closed",
+   "description": "## Synopsis\nWe want T-shirts for contributors as an annual thing. The current idea is to make the shirts from the About Screen contest winner art as an ongoing tradition.\n\n## To do:\n<!-- remove spaces between @ and name when it's time to distribute the tasks -->\n\n* [ ] Need a list of all current contributors who might want a teeshirt\n* [ ] Need an estimate of the total cost\n* [ ] Need PLC approval for that amount\n* [ ] Need shipping addresses of people who want a shirt\n* [ ] Need to order shirts and have Vistaprint ship those shirts.",
+   "labels": [],
+   "author": {
+    "username": "CRogers"
+   },
+   "created_at": "2023-05-06T18:07:44.910Z",
+   "updated_at": "2023-07-11T21:14:56.561Z",
+   "web_url": "https://gitlab.com/inkscape/vectors/content/-/work_items/113",
+   "source_branch": null,
+   "target_branch": null,
+   "notes": []
+  },
+  {
+   "id": 125761980,
+   "iid": 110,
+   "title": "FSA update PLC interview",
+   "state": "closed",
+   "description": "## Synopsis\nA couple questions for the PLC, who will use them to tell the Contributor community about the Inkscape memberships and the updated FSA.\n\n-------\nOn March 15, Inkscape's [new FSA](https://inkscape.org/gallery/item/9584/2022-Inkscape_FSA-update.pdf) was published to the inkscape.org website. It's a big step forward for Inkscape's contributor community, but not everyone may know what it all means yet. So, we asked the people who should know, the members of Inkscape's Project Leadership Committee (PLC).\n\n_Vectors:_ Hi! First of all, let's get the acronyms out of the way: what do FSA, PLC and SFC mean and how do they relate to the project?\n\n_Vectors:_ Okay, now we understand what they are, can you tell us **why** the FSA was changed? \n\n_Vectors_: Were there any other updates to the FSA?\n\n_Vectors_: Can you tell us a little about the process of updating the FSA?\n\n_Vectors_: What do the changes to the FSA mean for the contributors?\n\n_Vectors_: What requirements do people need to meet to be/become a member? Do memberships expire?\n\n_Vectors_: Is there anything that contributors need to do now, to become an official member?\n\n\n## Audience\nMainly Inkscape Contributors.\n\n## Title\nDemystifying Membership - A Contributor's (updated) Guide to the Inkscape Project \n## Authors\nVectors/Moini/PLC\n\n## Publication Channels\n\n* [ ] Website\n* [ ] post link to mailing lists for contributors\n* [ ] post link to Inkscape chat channels for contributors",
+   "labels": [],
+   "author": {
+    "username": "Moini"
+   },
+   "created_at": "2023-03-25T00:20:16.015Z",
+   "updated_at": "2023-04-05T16:11:06.884Z",
+   "web_url": "https://gitlab.com/inkscape/vectors/content/-/work_items/110",
+   "source_branch": null,
+   "target_branch": null,
+   "notes": []
+  },
+  {
+   "id": 126098908,
+   "iid": 111,
+   "title": "Inkscape 1.3 alpha0 release 2023.04.02",
+   "state": "closed",
+   "description": "## Synopsis\nRelease of first test version for Inkscape 1.3 (planned for end of June / beginning of July).\nCall for testers.\n\n## Audience\nUsers who are curious and involved with the community. People who care about getting a bug-reduced Inkscape 1.3.\n\n## Social\n\n[1.3alpha0.svg](/uploads/06883849ddd4f0ae98edaa430c6ec158/1.3alpha0.svg)\n![1.3alpha0_social](/uploads/2ab301ac60035b4869f6aa5f056095cc/1.3alpha0_social.png)\n\n\n## Author\nSuggested author of the article here.\n\n## Publication Channels\n\n* [x] Twitter post ( @zigzagmlt, @ ryangorley )\n* [x] Facebook group post ( @ t1mj0nes , @SoniaB)\n* [ ] German Facebook group (@diebasis72)\n* [ ] Instagram (@ t1mj0nes @SoniaB )\n* [x] Mastodon post ( @Moini, @ ryangorley )\n* [x] Forums ( @z3z )\n* [x] deviantArt ( @ crogers, @Lazur)\n* [ ] Discord (@nickmaleki )Ink",
+   "labels": [],
+   "author": {
+    "username": "Moini"
+   },
+   "created_at": "2023-03-31T21:48:21.204Z",
+   "updated_at": "2023-04-05T16:10:48.111Z",
+   "web_url": "https://gitlab.com/inkscape/vectors/content/-/work_items/111",
+   "source_branch": null,
+   "target_branch": null,
+   "notes": []
+  },
+  {
+   "id": 126112395,
+   "iid": 112,
+   "title": "April 1, 2023 Social Media Post",
+   "state": "closed",
+   "description": "## Synopsis\nIntroducing Inky the AI Assistant in Inkscape\n\n![inkscape_AI_assistant_Inky.svg](/uploads/3efe67684ef8841195b03a67027efe4e/inkscape_AI_assistant_Inky.svg)\n\n## Publication Channels\n<!-- remove spaces between @ and name when it's time to distribute the tasks -->\n\n* [x] Twitter post ( @zigzagmlt, @ ryangorley )\n* [ ] Facebook group post ( @ t1mj0nes , @SoniaB)\n* [ ] German Facebook group (@diebasis72)\n* [ ] Instagram (@ t1mj0nes @SoniaB )\n* [x] Mastodon post (@Moini, @ ryangorley )\n* [x] Forums (@z3z )\n* [x] deviantArt ( @ crogers, @Lazur)\n* [ ] Discord (@nickmaleki )",
+   "labels": [],
+   "author": {
+    "username": "zigzagmlt"
+   },
+   "created_at": "2023-04-01T16:59:07.093Z",
+   "updated_at": "2023-04-05T16:10:23.726Z",
+   "web_url": "https://gitlab.com/inkscape/vectors/content/-/work_items/112",
+   "source_branch": null,
+   "target_branch": null,
+   "notes": []
+  },
+  {
+   "id": 21977434,
+   "iid": 68,
+   "title": "Need a dedicated shop page: Inkscape.org/shop to list all of our various inkscape swag shops.",
+   "state": "opened",
+   "description": "## Synopsis\n\nNeed a dedicated shop page: Inkscape.org/shop to list all of our various inkscape swag shops.\n\n* [x] Add a page inkscape.org/shop with links to spreadshirt and hello tux\n* [x] Add HELLOTUX link: https://www.hellotux.com/inkscape\n* [x] Add Spreadshirt link: https://shop.spreadshirt.com/inkscape-shop\n* [ ] Add donation page link: https://inkscape.org/support-us/donate/\n* [ ] Make page look nice\n* [ ] Translate page to major languages\n\n## Title\nInkscape Shop\n\n## Author\nSuggested author: [TBD]  \nDesigner: [TBD]\n\n## Publication channels\n\n* [ ] Website",
+   "labels": [],
+   "author": {
+    "username": "CRogers"
+   },
+   "created_at": "2019-06-17T13:41:14.932Z",
+   "updated_at": "2023-03-16T14:14:06.497Z",
+   "web_url": "https://gitlab.com/inkscape/vectors/content/-/work_items/68",
+   "source_branch": null,
+   "target_branch": null,
+   "notes": []
+  },
+  {
+   "id": 30539496,
+   "iid": 80,
+   "title": "Great Bug migration - some minor changes in the instructions",
+   "state": "opened",
+   "description": "As I said in the Vectors meeting earlier, there are some changes I'd like to make to the Bug migration page. Since I was unable to find a repository for that, I'm opening an issue here with a diff hoping that someone can apply it.\n\n* Fixed some typos\n* Removed the duplicate \"Bookmark this page\"\n* Added a bullet point to search for duplicates first, linking to https://gitlab.com/groups/inkscape/-/issues\n* Inform player that reproduction messages should be collected, also from duplicates\n\nFull diff: [diff_migration.txt](/uploads/9148b5b034bea7d3e32772c35a9d695c/diff_migration.txt)",
+   "labels": [],
+   "author": {
+    "username": "joneuhauser"
+   },
+   "created_at": "2020-02-08T19:20:13.465Z",
+   "updated_at": "2023-03-16T02:22:55.912Z",
+   "web_url": "https://gitlab.com/inkscape/vectors/content/-/work_items/80",
+   "source_branch": null,
+   "target_branch": null,
+   "notes": []
+  },
+  {
+   "id": 17955325,
+   "iid": 39,
+   "title": "Revising / Finalizing the Content Repository Wiki",
+   "state": "opened",
+   "description": "## Synopsis\nThis Wiki helps users to understand how to wrangle the repo that holds articles, images, media, videos... and troubleshoot challenges. \n\n## Audience\nEveryone using the Inkscape Vectors Content Repo\n\n## Title\nHow to collaborate\n\n## Author\n\n\n## Publication Channels\n<!-- remove spaces between @ and name when it's time to distribute the tasks -->\n\n* [ ] Website\n* [ ] Twitter post ( @ ryangorley )\n* [ ] Facebook group post ( @ t1mj0nes )\n* [ ] Mastodon post ( @ ryangorley )\n* [ ] Forums ( @ brynn or @ Lazur )\n* [ ] google+ ( @ prokoudine, @ ryangorley or @ CRogers )\n* [ ] deviantArt ( @ doctormo or @ Lazur )\n* [ ] openClipart ( @ Lazur )",
+   "labels": [
+    "In Progress"
+   ],
+   "author": {
+    "username": "zigzagmlt"
+   },
+   "created_at": "2019-02-05T01:36:18.356Z",
+   "updated_at": "2023-03-16T02:08:30.479Z",
+   "web_url": "https://gitlab.com/inkscape/vectors/content/-/work_items/39",
+   "source_branch": null,
+   "target_branch": null,
+   "notes": []
+  },
+  {
+   "id": 18039448,
+   "iid": 40,
+   "title": "Bug Migration Game - Game dynamics, links, duration, swag etc.",
+   "state": "opened",
+   "description": "## Synopsis\nI'm starting a new issue for this, as it goes beyond the scope of the infographic issue, since I think we have the visuals pretty well sorted. This is to discuss the game, how it will work, how we go about follow-through, and other plans for the migration game. \n\n## Audience\n@Moini @zigzagmlt @prkos @ede123 @bryceharrington @doctormo @marcjeanmougin @juan.duarte and there's probably more. Anyone can join in this discussion, but keep in mind that time is short, and the more people invited to this party, the longer it's likely to last.\n\n## Title\nThis is not something to release to the public, it's just getting all our bugs in the same basket. :)\n\n## Author\n@CRogers\n\n* [x]  clarify links\n* [x]  include feedback about wording in draft\n* [x]  decide on <s>end date</s> / **no end date**: when all bugs are migrated\n* [x]  decide on swag items (which ones?) - **Stickers, shirts & mugs/water bottle (possibly certificates)**\n* [x]  get board approval for swag payment (complete)- **Stickers/swag budget of 200 GBP approved**\n* [x]  clarify where game stats page will live (and put it there and link from instructions): http://alpha.inkscape.org/bug-migration/leaderboard.html\n* [x]  decide on upload location for game info html page: http://alpha.inkscape.org/bug-migration/\n* [x]  decide on start date - <s>**March 15th**</s> **in April**\n* [ ]  fix layout of bug migration pages (there are two margins missing at the bottom)\n* [ ]  decide on handling / suggestions for duplicates\n* [x]  write announcements and push them out\n* [ ]  let bug triagers know in advance, so they know when to expect the 'flood'\n* [x]  give bug migrators a place where they can ask questions\n* [ ]  organise \"Bug Stock Show\" event for users to trade bugs (after event ends)\n* [ ]  short video to introduce the event, and how easy it is to migrate a bug.\n\n## Publication Channels\n* [ ] Website\n* [x] Twitter post ( @ryangorley )\n* [x] Facebook group post ( @t1mj0nes )\n* [x] Mastodon post ( @ryangorley )\n* [ ] Forums ( @brynn or @Lazur )\n* [ ] deviantArt ( @doctormo or @Lazur )\n* [ ] openClipart ( @Lazur )\n\n---\n\nEdit says: link to the migration manual draft is http://crogersmedia.com/bug_migration/instructions.html (so people actually know what we're discussing)\nOr this one: http://alpha.inkscape.org/bug-migration/",
+   "labels": [
+    "Design",
+    "In Progress",
+    "Unpublished Draft"
+   ],
+   "author": {
+    "username": "CRogers"
+   },
+   "created_at": "2019-02-07T11:21:22.596Z",
+   "updated_at": "2023-03-16T02:07:34.871Z",
+   "web_url": "https://gitlab.com/inkscape/vectors/content/-/work_items/40",
+   "source_branch": null,
+   "target_branch": null,
+   "notes": []
+  },
+  {
+   "id": 85074790,
+   "iid": 97,
+   "title": "Inkscape Challenges - Social Media Posts",
+   "state": "closed",
+   "description": "## Synopsis\nFollowing discussions in Rocket Chat, this thread is for posting details of the fortnightly Inkscape challenges, so that social media account managers can share details on their platforms.\n\n## Audience\nGeneral promotion to the Inkscape community at large, encouraging them to join in with community projects and build closer engagement with the project\n\n## Title\nNot applicable\n\n## Author\nNot applicable\n\n## Publication Channels\n<!-- remove spaces between @ and name when it's time to distribute the tasks -->\n\n* [ ] Twitter post ( @zigzagmlt, @ryangorley )\n* [x] Facebook group post ( @ t1mj0nes , @ SoniaB)\n* [x] German Facebook group (@ diebasis72)\n* [x] Instagram (@t1mj0nes)\n* [x] Mastodon post ( @Moini, @ryangorley )\n* [x] Forums ( @ z3z )\n* [ ] deviantArt ( @crogers)\n* [ ] Discord (@nickmaleki )\n\n\n**12 - 26 April Challenge**\n\nSuggested wording for social media post:\n\n> The new community challenge has started. This time, our topic is EARTH DAY.\n>  \n> Create a pic and share your work with us. No prizes, just fun! Deadline: 26 April. \n>  \n> More info here\n> https://inkscape.org/forums/competitions/challenge-earth-day-12-26-april/#c27013\n\nI've attached two pics that can be used in addition to the wording above. One pic is an image showing only the challenge theme. The other pic has additional text underneath to provide more context. Social media managers are free to use whichever pic feels most appropriate.\n\n\n![challenge_without_text](/uploads/5255f90ec8e87e5a570e78afa103761b/challenge_without_text.png)\n \n![challenge_with_text](/uploads/d05d2cf6d7f58da6c59d731e3460dd41/challenge_with_text.png)",
+   "labels": [],
+   "author": {
+    "username": "z3z"
+   },
+   "created_at": "2021-04-12T21:46:21.015Z",
+   "updated_at": "2023-03-16T01:10:33.140Z",
+   "web_url": "https://gitlab.com/inkscape/vectors/content/-/work_items/97",
+   "source_branch": null,
+   "target_branch": null,
+   "notes": []
+  },
+  {
+   "id": 86889860,
+   "iid": 98,
+   "title": "Article - Bryce's Retirement Announcement",
+   "state": "closed",
+   "description": "## Synopsis\nA short description of the article here.\n\n## Audience\nWho will be interested in this article here.\n\n## Title\nInkscape Contributors and Community Bid a Fond Farewell to One of Inkscape's Founding Fathers\n\n## Author\nC.Rogers\n\n\nAs Inkscape 1.1 release approaches there's big news in the project.\n\nBryce Harrington, one of the four original founders of the Inkscape Project is leaving the Board of Directors.\nBryce, along with Ted Gould, Nathan Hurst, and MenTaLguY developed a fork of the Sodipodi project into the SVG standards-based vector editing powerhouse that it is today.\n\nBryce describes his early role in the project as \"more organisational - trying to get people involved\". For many years Bryce has served on the Board of Directors of the project, providing access to resources and infrastructure. He is also the project's primary contact for the Software Freedom Conservancy (SFC) who collects funds on behalf of the project, and provides legal support and nonprofit status.\n\nBut as the project approaches nearly 20 years of activity, Bryce announced today at the Board meeting that he will retire from the board.\n\nOver the past few years, the project has seen tremendous growth, adding many subgroups of contributors including teams for UX, documentation, extensions, bug migration/triaging/testing, website editors, and even a MacOS development team. The project has also held a myriad of hackfests and other events, and a variety of internal issues handled by the Board. With all these projects, each with their own requirements the overhead for organisation tasks, Bryce has expressed his need to return to his life outside the project.\n\n\"The project's administrative needs have increased over the years, yet unfortunately I'm finding it increasingly difficult to find freetime to handle them, particularly so this past year.\"\n\n\n\"It's hard to believe it's been 20 years since Inkscape started. I never thought I'd see the day we'd hit 1.0 and am proud we did.\"\n\n\n## Publication Channels\n<!-- remove spaces between @ and name when it's time to distribute the tasks -->\n\n* [ ] Website\n* [ ] Twitter post ( @ zigzagmlt, @ ryangorley )\n* [ ] Facebook group post ( @ t1mj0nes , @ SoniaB)\n* [ ] German Facebook group (@ diebasis72)\n* [ ] Instagram (@ t1mj0nes)\n* [ ] Mastodon post ( @ Moini, @ ryangorley )\n* [ ] Forums ( @ z3z )\n* [ ] deviantArt ( @ crogers, @ Lazur)\n* [ ] Discord (@ nickmaleki )",
+   "labels": [],
+   "author": {
+    "username": "CRogers"
+   },
+   "created_at": "2021-05-11T19:33:10.159Z",
+   "updated_at": "2023-03-16T01:10:01.400Z",
+   "web_url": "https://gitlab.com/inkscape/vectors/content/-/work_items/98",
+   "source_branch": null,
+   "target_branch": null,
+   "notes": []
+  },
+  {
+   "id": 114788339,
+   "iid": 106,
+   "title": "Social Media Campaign - Message & GIFs for Inkscape 1.2",
+   "state": "closed",
+   "description": "## Synopsis\nThis issue will follow a social media campaign to publish the 20+ posts created by @adam.belis that promote different tools in Inkscape 1.2. Ideally we'll be able to send one post out every week.\n\nhttps://office.inkscape.org/nextcloud/index.php/apps/files/?dir=/Vectors/Social%20Media%20posts&fileid=15029\n\n## Audience\nInkscape users\n\n## Title\nWe can use the following hashtag to promote this series of posts #ArtWithOpenSource\n\n## Author\n\n\n## Publication Channels\n<!-- remove spaces between @ and name when it's time to distribute the tasks -->\n\n* [ ] Website\n* [ ] Twitter post ( @ zigzagmlt, @ ryangorley )\n* [x] Facebook group post ( @ t1mj0nes , @ SoniaB)\n* [ ] German Facebook group (@ diebasis72)\n* [ ] Instagram (@ t1mj0nes)\n* [ ] Mastodon post ( @ Moini, @ ryangorley )\n* [ ] Forums ( @ z3z )\n* [ ] deviantArt ( @ crogers, @ Lazur)\n* [ ] Discord (@ nickmaleki )",
+   "labels": [],
+   "author": {
+    "username": "zigzagmlt"
+   },
+   "created_at": "2022-09-10T21:56:45.673Z",
+   "updated_at": "2023-03-16T01:09:17.426Z",
+   "web_url": "https://gitlab.com/inkscape/vectors/content/-/work_items/106",
+   "source_branch": null,
+   "target_branch": null,
+   "notes": []
+  }
+ ],
+ "merge_requests": [
+  {
+   "id": 147064352,
+   "iid": 12,
+   "title": "Add new directory for the About 1.2 workfiles",
+   "state": "closed",
+   "description": "",
+   "labels": [],
+   "author": {
+    "username": "SpriteAttack"
+   },
+   "created_at": "2022-03-25T10:33:32.386Z",
+   "updated_at": "2025-05-02T12:46:48.398Z",
+   "web_url": "https://gitlab.com/inkscape/vectors/content/-/merge_requests/12",
+   "source_branch": "SpriteAttack-master-patch-26040",
+   "target_branch": "master",
+   "notes": []
+  },
+  {
+   "id": 143565387,
+   "iid": 11,
+   "title": "Draft: Resolve \"Contributors 2021 Thank You News article\"",
+   "state": "closed",
+   "description": "Closes #101",
+   "labels": [],
+   "author": {
+    "username": "victorwestmann"
+   },
+   "created_at": "2022-03-07T00:49:00.628Z",
+   "updated_at": "2025-05-02T12:46:24.604Z",
+   "web_url": "https://gitlab.com/inkscape/vectors/content/-/merge_requests/11",
+   "source_branch": "101-contributors-2021-thank-you-news-article",
+   "target_branch": "master",
+   "notes": []
+  },
+  {
+   "id": 265322631,
+   "iid": 17,
+   "title": "1.3.2 About data",
+   "state": "merged",
+   "description": "![about1.3.2.svg](/uploads/79287e74bd8dc66382ff8aab80f72ec5/about1.3.2.svg)",
+   "labels": [],
+   "author": {
+    "username": "jabiertxof"
+   },
+   "created_at": "2023-11-22T21:06:50.914Z",
+   "updated_at": "2023-11-28T01:15:42.642Z",
+   "web_url": "https://gitlab.com/inkscape/vectors/content/-/merge_requests/17",
+   "source_branch": "1.3.2About",
+   "target_branch": "master",
+   "notes": []
+  },
+  {
+   "id": 258626032,
+   "iid": 16,
+   "title": "Add 1.3.1 images",
+   "state": "merged",
+   "description": "Add images for 1.3.1.  \n\n![start-welcome](/uploads/715727bf9d8f8ca6426119301e98e5e3/start-welcome.png)",
+   "labels": [],
+   "author": {
+    "username": "jabiertxof"
+   },
+   "created_at": "2023-10-23T17:14:03.622Z",
+   "updated_at": "2023-10-23T17:43:03.542Z",
+   "web_url": "https://gitlab.com/inkscape/vectors/content/-/merge_requests/16",
+   "source_branch": "updateAboutScreen1.3.1",
+   "target_branch": "master",
+   "notes": []
+  },
+  {
+   "id": 236817097,
+   "iid": 15,
+   "title": "Add1 3 about",
+   "state": "merged",
+   "description": "Add1 3 about",
+   "labels": [],
+   "author": {
+    "username": "jabiertxof"
+   },
+   "created_at": "2023-07-16T20:11:22.726Z",
+   "updated_at": "2023-07-16T20:11:29.989Z",
+   "web_url": "https://gitlab.com/inkscape/vectors/content/-/merge_requests/15",
+   "source_branch": "add1_3About",
+   "target_branch": "master",
+   "notes": []
+  }
+ ]
+}

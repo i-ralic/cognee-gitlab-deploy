@@ -97,10 +97,37 @@ not something this task should lean on. Off, there is one tenant, one dataset, a
 the same data" holds by construction. Turning it on would add: a service user for the sync,
 token handling in `ask.sh`, and per-dataset databases in Postgres.
 
+## Reproduce the appendix offline (no GitLab account)
+
+gitlab.com blocked the account that owned the seeded project (REPORT.md, "Reproducibility
+caveat"), so the edit / add / delete re-sync is also reproducible against a stand-in: a 230-line
+stdlib HTTP server that serves `fixtures/offline-corpus.json` as GitLab API v4 (listing with
+`state`/`order_by`/`sort`, 100 per page, `Link: rel="next"`, `X-Total`, per-item notes). The
+connector only sees a different `GITLAB_URL`; nothing in it knows about the fake. The fixture is
+19 public issues + 5 merge requests from `inkscape/vectors/content`, captured anonymously (so no
+comments: gitlab.com needs a token for notes), 31 KB of text.
+
+```bash
+docker compose --profile offline up -d fake-gitlab
+export GITLAB_URL=http://fake-gitlab:8080 GITLAB_PROJECT=1 COGNEE_DATASET=gitlab_offline GITLAB_TOKEN=
+docker compose run --rm sync                                       # sync 1: 19 + 5 changed
+python3 scripts/fake_gitlab.py mutate --corpus fixtures/offline-corpus.json   # edit / add / delete, with marker sentences
+docker compose run --rm sync                                       # sync 2: "Issue: 2 changed, 1 deleted"
+docker compose run --rm sync                                       # sync 3: 0 changed, 0 deleted
+docker compose exec -T postgres psql -U cognee -d cognee_db -v ds=<dataset_id from the sync output> -f - < scripts/graph_report_dataset.sql
+```
+
+Measured on 05.10 on this stack (lima VM, 4 CPUs / 8 GB): sync 1 41 s, peak 2.8 GiB, 353 nodes /
+991 edges in the dataset; sync 2 12 s, "Deleting 2 orphaned dlt row(s)", 316 / 887, the deleted
+issue's chunks gone, both markers present as entities with relations; sync 3 3 s, unchanged. Full
+numbers in REPORT.md → Appendix → "Re-verified offline". `git checkout fixtures/` restores the
+fixture after a mutate. To refresh it: `python3 scripts/fake_gitlab.py capture --source
+inkscape/vectors/content --out fixtures/offline-corpus.json`.
+
 ## Layout
 
 ```
-docker-compose.yml       postgres + api + sync (sync is a profile; never starts with `up`)
+docker-compose.yml       postgres + api + sync + fake-gitlab (sync and fake-gitlab are profiles; never start with `up`)
 sync/Dockerfile          cognee/cognee:main + the connector, nothing else
 sync/sync.py             one foreground remember(); batch knobs; optional loop; last_success.json
 sync/healthcheck.py      healthy = last success within 2x the interval
@@ -110,5 +137,8 @@ scripts/measure.sh       docker stats sampler: peak memory / CPU per container w
 scripts/graph_report.sql node/edge type counts, hubs, sampled relations from graph_node/graph_edge
 scripts/seed_gitlab.py   copy public issues/MRs into a project you own, with attribution
 scripts/mutate_corpus.py one edit, one add, one delete, each with a searchable marker sentence
+scripts/fake_gitlab.py   GitLab API v4 stand-in (capture / serve / mutate) for the offline reproduction
+scripts/graph_report_dataset.sql  the same counts scoped to one dataset id (graph_node.source_dataset_ids)
+fixtures/offline-corpus.json      19 public issues + 5 MRs for the stand-in (see "Reproduce the appendix offline")
 REPORT.md                Part 3: what ended up in the graph and what did not (+ appendix)
 ```

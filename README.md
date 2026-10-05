@@ -60,6 +60,30 @@ roughly 2 s per document on CPU. Limits in `docker-compose.yml`: sync 5 GiB (pea
 cores and nothing else competes with it. A GPU would move the sync to seconds; nothing in the
 compose file assumes one.
 
+**Memory scales with chunks per GLiNER call, not with corpus size.** The second corpus (the
+board's seeded project, 19 issues + 5 merge requests, **comments on**, documents up to 33 KB /
+5,200 words) OOM-killed the 5 GiB sync container three times at cognee's defaults. Measured
+inside the image: the process sits at **2.7 GiB** once cognee, torch and GLiNER are loaded;
+scoring one 384-word window adds nothing visible; four windows in one pass add ~1 GiB; a
+14-window document in one pass passes 5 GiB and dies. cognee hands GLiNER every chunk of a
+document in one call (`chunks_per_batch` defaults to 2000) and GLiNER scores 16 of them per
+forward pass, so the limit was never about the number of documents. `sync.py` therefore passes
+`chunks_per_batch` (`SYNC_CHUNKS_PER_BATCH`, default 4) and `data_per_batch`
+(`SYNC_DATA_PER_BATCH`, default 4) to `remember()`. With both at 4 the 24-document sync took
+125 s and peaked at **4.5 GiB**; the 2-changed/1-deleted re-sync took 15 s and peaked at 3.0 GiB.
+On a host with less than 8 GB for the VM, set `SYNC_DATA_PER_BATCH=2`.
+
+**Closed schema from an ontology file, not the label-bank probe.** Without a schema cognee
+builds one per document by running the whole 30-label bank over a 3,000-word "sketch" of the
+document in a single unwindowed pass; on long issue threads that pass alone needs > 5 GiB (it
+was the first OOM). `ontology/gitlab.owl` names 9 entity types and 8 relation types that fit a
+software project's issue tracker (person, organization, software, version, event, location,
+date, feature, publication; sponsors, hosts, released_on, works_on, held_in, member_of, writes,
+part_of). `ONTOLOGY_FILE_PATH` points the sync container at it, the probe is skipped and
+extraction runs windowed at 384 words. Side effect, visible in the report's appendix: the two
+relation types the first corpus lacked (`sponsors`, `released_on`) now exist. Unset the variable
+to go back to the open label bank.
+
 **Health checks.** API: the image's own `curl -f /health`. Postgres: `pg_isready`, and both
 cognee containers wait for it. Sync: "healthy" means *the last sync finished and the cursor
 advanced*. One-shot mode: exit code 0 and a `last_success.json` written by `sync.py`. Loop mode:
@@ -76,10 +100,15 @@ token handling in `ask.sh`, and per-dataset databases in Postgres.
 ## Layout
 
 ```
-docker-compose.yml   postgres + api + sync (sync is a profile; never starts with `up`)
-sync/Dockerfile      cognee/cognee:main + the connector, nothing else
-sync/sync.py         one foreground remember(); optional loop; writes last_success.json
-sync/healthcheck.py  healthy = last success within 2x the interval
-scripts/ask.sh       POST /api/v1/search, CHUNKS, over the synced dataset
-REPORT.md            Part 3: what ended up in the graph and what did not
+docker-compose.yml       postgres + api + sync (sync is a profile; never starts with `up`)
+sync/Dockerfile          cognee/cognee:main + the connector, nothing else
+sync/sync.py             one foreground remember(); batch knobs; optional loop; last_success.json
+sync/healthcheck.py      healthy = last success within 2x the interval
+ontology/gitlab.owl      closed GLiNER schema (9 entity types, 8 relation types) - see Decisions
+scripts/ask.sh           POST /api/v1/search, CHUNKS, over the synced dataset
+scripts/measure.sh       docker stats sampler: peak memory / CPU per container while a sync runs
+scripts/graph_report.sql node/edge type counts, hubs, sampled relations from graph_node/graph_edge
+scripts/seed_gitlab.py   copy public issues/MRs into a project you own, with attribution
+scripts/mutate_corpus.py one edit, one add, one delete, each with a searchable marker sentence
+REPORT.md                Part 3: what ended up in the graph and what did not (+ appendix)
 ```

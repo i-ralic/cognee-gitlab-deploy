@@ -136,8 +136,49 @@ small OWL file (`ONTOLOGY_FILE_PATH`) gives the GLiNER demo exactly those.
 
 ## Appendix: the second sync with an edit, an add and a delete
 
-Pending: the corpus above is a public project I cannot edit. The connector's deletion path is
-proven offline (`test_forget_on_delete_end_to_end_through_a_real_dlt_merge`) and the no-change
-re-sync is proven live (9 s, 0 changed, 0 deleted). The edit/add/delete run will be repeated on
-the board-owned project seeded with `scripts/seed_gitlab.py`, and this section filled with the
-before/after node and edge counts.
+Done on a project I own, `collabwriting-app/cognee-corpus`, seeded by `scripts/seed_gitlab.py`
+from the same public tracker: **19 issues + 5 merge requests = 24 documents, comments on**, so
+documents are up to 33 KB (the first corpus maxed at 4.8 KB). Dataset `gitlab_corpus`, schema
+from `ontology/gitlab.owl` (see README "Decisions"; the first corpus used the open label bank).
+Counts are for nodes tagged with this dataset; entity nodes shared with the first dataset
+(`inkscape`, `twitter`, ...) carry that dataset's edges too, which is why relation names outside
+the ontology appear. The deltas are what matter.
+
+| | Sync 1 (fresh) | `mutate_corpus.py` | Sync 2 | Sync 3 |
+|---|---|---|---|---|
+| Connector log | 19 + 5 changed, 0 deleted | edit #4, add #20, delete #18 | **Issue: 2 changed, 1 deleted** | 0 changed, 0 deleted |
+| Wall / peak RSS | 125 s / 4.5 GiB | | 15 s / 3.0 GiB | 5 s |
+| TextDocument | 24 | | 24 (−1 deleted, +1 added, edited one re-hashed) | 24 |
+| DocumentChunk / TextSummary | 93 / 93 | | 92 / 92 | 92 |
+| Entity | 574 | | 573 | 573 |
+| Nodes / edges | 793 / 2,601 | | **790 / 2,563** | 790 / 2,563 |
+
+**What the graph did with each change** (SQL on `graph_node` / `graph_edge`):
+
+- **Delete** (issue #18, "Article - Bryce's Retirement Announcement"): the connector's id sweep
+  emitted one `_deleted` row; cognee logged *"Deleting 2 orphaned dlt row(s)"* (the deleted issue
+  and the pre-edit version of #4, whose content hash changed) and removed the orphaned chunks,
+  summaries and edge types. Chunks containing that title in this dataset: **0**. The copy of the
+  same article in the first dataset (#98) is still there, and still comes back from `recall()`,
+  because search in this deployment does not honour the `datasets` filter with access control off
+  (one user, all datasets). That is a finding, not a bug in the connector.
+- **Add** (issue #20, marker "the Quokka palette ships with Inkscape 1.5 and was drawn by Mira
+  Kovac"): one new document, one chunk; graph: `quokka palette is_a feature`, `mira kovac is_a
+  person`, and one wrong edge, `quokka palette released_on 20261005-1013` (GLiNER read the marker's
+  timestamp as a date). `recall()` for the sentence: **rank 1**.
+- **Edit** (issue #4, marker "the Zagreb Hackfest 2026 is hosted by Collabwriting at the Lauba
+  hall" appended to a 4.9 KB description): the connector re-fetched it (`updated_at` moved), cognee
+  replaced the document. Graph: `collabwriting hosts zagreb hackfest 2026`, `zagreb hackfest 2026
+  held_in lauba hall`, `held_in zagreb`, `lauba hall is_a location`, plus an over-read
+  `collabwriting sponsors zagreb hackfest 2026`. `recall()` for the literal sentence: rank 2; for
+  *"Where is the Zagreb Hackfest 2026 held?"*: **not in the top 5**. The fact is in the graph but
+  sits at the end of a chunk whose embedding is about something else; `CHUNKS` search cannot
+  reach it and `GRAPH_COMPLETION` needs an LLM. Same lesson as section 6: a fact buried in a long
+  issue body is a graph fact, not a retrievable chunk.
+
+**What this run changed in the deployment** (README "Resources"): the defaults OOM-killed the
+sync three times on these longer documents. Root cause measured, not guessed: 2.7 GiB process
+baseline + ~250 MiB per chunk scored in one GLiNER pass, and cognee sends every chunk of a
+document in one call. `SYNC_CHUNKS_PER_BATCH=4` and the closed schema fixed it. The connector-side
+follow-up for PR 1 is a cap on rendered comment length, so that one issue with a 200-comment
+thread cannot dictate the memory limit of the whole deployment.

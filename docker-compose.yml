@@ -75,8 +75,8 @@ services:
     deploy:
       resources:
         limits:
-          # Measured, not guessed: see README "Resources". Placeholder until measured.
-          memory: ${API_MEM_LIMIT:-3g}
+          # Measured idle peak 634 MiB (see README "Resources").
+          memory: ${API_MEM_LIMIT:-1g}
 
   sync:
     build: ./sync
@@ -103,7 +103,8 @@ services:
     deploy:
       resources:
         limits:
-          memory: ${SYNC_MEM_LIMIT:-4g}
+          # Measured peak 3.5 GiB on a 134-document sync (see README "Resources").
+          memory: ${SYNC_MEM_LIMIT:-5g}
 
 volumes:
   pg_data:

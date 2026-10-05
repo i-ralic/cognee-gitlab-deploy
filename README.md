@@ -49,9 +49,16 @@ image already owns as uid 1000 (a fresh volume at a custom path would be root-ow
 ~750 MB GLiNER model and the fastembed model download once, on the first sync, and the API
 reuses the same fastembed cache for query embeddings.
 
-**Resources: measured with `scripts/measure.sh`, not guessed.** _Numbers filled in from the
-first 100+ document sync; see "Measured" below._ The limits in `docker-compose.yml`
-(`SYNC_MEM_LIMIT`, `API_MEM_LIMIT`) are set to the measured peak plus headroom.
+**Resources: measured with `scripts/measure.sh`, not guessed.** First sync of 134 documents
+(117 issues + 17 merge requests, public project `inkscape/vectors/content`, comments off, VM with
+4 CPUs / 8 GB, Apple M-series): wall clock 287 s, of which 282 s inside `remember()`; the sync
+container peaked at **3.5 GiB RSS and 3.9 cores**, the API at 634 MiB (idle), Postgres at 136 MiB.
+Second sync (no changes): 13 s, sync peak 599 MiB, 0.7 cores. The GLiNER model is the memory: it
+loads once per sync process (6.4 s from the cache) and runs one batched pass per chunk batch at
+roughly 2 s per document on CPU. Limits in `docker-compose.yml`: sync 5 GiB (peak + ~40 %), API
+1 GiB, Postgres 1 GiB; CPU is left unlimited because the sync is embarrassingly parallel across
+cores and nothing else competes with it. A GPU would move the sync to seconds; nothing in the
+compose file assumes one.
 
 **Health checks.** API: the image's own `curl -f /health`. Postgres: `pg_isready`, and both
 cognee containers wait for it. Sync: "healthy" means *the last sync finished and the cursor

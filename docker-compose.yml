@@ -1,0 +1,110 @@
+# cognee + GitLab connector, no LLM key.
+#
+# Three services:
+#   postgres  one Postgres holds all three cognee stores: relational, pgvector, postgres_demo graph
+#   api       the published cognee image, answers /api/v1/search (recall) over the synced data
+#   sync      same image + the GitLab connector; runs remember() in the foreground, once or on an interval
+#
+# Both cognee containers share one Postgres and one model-cache volume, so a sync and a
+# recall see the same data and the ~750 MB GLiNER model downloads once.
+#
+#   docker compose up -d                 # bring the stack up (postgres + api)
+#   docker compose run --rm sync         # run one sync
+#   ./scripts/ask.sh "your question"     # ask a question
+
+x-cognee-env: &cognee-env
+  # --- no LLM key anywhere: cognee falls back to GLiNER (graph) + fastembed (embeddings)
+  # LLM_API_KEY is intentionally unset.
+  # --- one Postgres for all stores
+  DB_PROVIDER: postgres
+  DB_HOST: postgres
+  DB_PORT: "5432"
+  DB_USERNAME: cognee
+  DB_PASSWORD: ${POSTGRES_PASSWORD:-cognee}
+  DB_NAME: cognee_db
+  VECTOR_DB_PROVIDER: pgvector
+  VECTOR_DB_URL: postgresql://cognee:${POSTGRES_PASSWORD:-cognee}@postgres:5432/cognee_db
+  GRAPH_DATABASE_PROVIDER: postgres_demo
+  GRAPH_DATABASE_URL: postgresql+asyncpg://cognee:${POSTGRES_PASSWORD:-cognee}@postgres:5432/cognee_db
+  # --- single tenant: both processes act as the default user and see one dataset
+  ENABLE_BACKEND_ACCESS_CONTROL: "false"
+  # --- model caches on a shared named volume (owned by the image's uid 1000)
+  HF_HOME: /cognee-storage/models/hf
+  FASTEMBED_CACHE_PATH: /cognee-storage/models/fastembed
+  # --- dlt pipeline working dir on the shared volume (state also lives in Postgres)
+  DLT_DATA_DIR: /cognee-storage/dlt
+  TOKENIZERS_PARALLELISM: "false"
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg17
+    environment:
+      POSTGRES_USER: cognee
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-cognee}
+      POSTGRES_DB: cognee_db
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cognee -d cognee_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    deploy:
+      resources:
+        limits:
+          memory: 1g
+
+  api:
+    image: cognee/cognee:main
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      <<: *cognee-env
+    ports:
+      - "8000:8000"
+    volumes:
+      - cognee_storage:/cognee-storage
+    # /health is the image's own HEALTHCHECK; repeated here so `compose ps` shows it.
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          # Measured, not guessed: see README "Resources". Placeholder until measured.
+          memory: ${API_MEM_LIMIT:-3g}
+
+  sync:
+    build: ./sync
+    profiles: ["sync"]            # never starts with `up`; run explicitly
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      <<: *cognee-env
+      GITLAB_URL: ${GITLAB_URL:-https://gitlab.com}
+      GITLAB_PROJECT: ${GITLAB_PROJECT:?set GITLAB_PROJECT to group/project}
+      GITLAB_TOKEN: ${GITLAB_TOKEN:-}
+      COGNEE_DATASET: ${COGNEE_DATASET:-gitlab_project}
+      SYNC_INTERVAL_SECONDS: ${SYNC_INTERVAL_SECONDS:-0}   # 0 = run once and exit
+      GITLAB_INCLUDE_COMMENTS: ${GITLAB_INCLUDE_COMMENTS:-true}
+    volumes:
+      - cognee_storage:/cognee-storage
+    # Healthy = the last successful sync finished within 2x the interval.
+    healthcheck:
+      test: ["CMD", "python", "/app/sync/healthcheck.py"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: ${SYNC_MEM_LIMIT:-4g}
+
+volumes:
+  pg_data:
+  cognee_storage:

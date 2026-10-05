@@ -20,14 +20,51 @@ because both talk to the same Postgres.
 
 ## Decisions (the reasoning the task asks for)
 
-_Filled in as each is measured; see REPORT.md for the corpus analysis._
+**Where the sync runs: a second container on the same image.** `remember()` with a dlt source
+runs in the process that calls it; it is not an HTTP call. The API process could do both, but a
+GLiNER extraction over a hundred documents is minutes of CPU, and the published image does not
+contain the connector. So `sync` is `cognee/cognee:main` plus one `pip install --no-deps` of the
+connector, with its own entrypoint, its own memory limit and its own failure domain. It runs once
+per `docker compose run --rm sync`, or loops with `SYNC_INTERVAL_SECONDS`. It always runs
+`remember()` in the foreground, because cognee only runs forget-on-delete (orphan cleanup) for
+foreground syncs. Both containers see the same data because both talk to the same Postgres.
 
-- Where the sync runs
-- Which databases
-- Model caches
-- Resource requests and limits (measured)
-- Health checks
-- `ENABLE_BACKEND_ACCESS_CONTROL`
+**Which databases: one Postgres for all three stores.** cognee's defaults (SQLite, LanceDB,
+Ladybug) are embedded, file-based, single-process stores; cognee itself serialises dlt staging
+behind a lock *inside one process* and says nothing about two processes. Two containers writing
+the same embedded files is undefined behaviour, so the choice is really "one process" versus
+"a database server". Postgres carries relational (`DB_PROVIDER=postgres`), vectors
+(`VECTOR_DB_PROVIDER=pgvector`) and the graph (`GRAPH_DATABASE_PROVIDER=postgres_demo`) in one
+service that the `pgvector/pgvector:pg17` image provides. The dlt destination follows the
+relational provider, so the connector's cursor and known-id set also land in Postgres
+(`_dlt_pipeline_state`) and survive a recreated sync container. Cost: `postgres_demo` is a demo
+backend and does not support raw Cypher, so `SearchType.CYPHER` is unavailable; the report
+reads the two graph tables (`graph_node`, `graph_edge`) with SQL instead. A graph-native store
+(Neo4j, also in cognee's compose) is the alternative when Cypher matters more than one less
+container.
+
+**Model caches: one named volume, mounted in both containers.** `HF_HOME` and
+`FASTEMBED_CACHE_PATH` point under `/cognee-storage/models`, on the `cognee_storage` volume the
+image already owns as uid 1000 (a fresh volume at a custom path would be root-owned). The
+~750 MB GLiNER model and the fastembed model download once, on the first sync, and the API
+reuses the same fastembed cache for query embeddings.
+
+**Resources: measured with `scripts/measure.sh`, not guessed.** _Numbers filled in from the
+first 100+ document sync; see "Measured" below._ The limits in `docker-compose.yml`
+(`SYNC_MEM_LIMIT`, `API_MEM_LIMIT`) are set to the measured peak plus headroom.
+
+**Health checks.** API: the image's own `curl -f /health`. Postgres: `pg_isready`, and both
+cognee containers wait for it. Sync: "healthy" means *the last sync finished and the cursor
+advanced*. One-shot mode: exit code 0 and a `last_success.json` written by `sync.py`. Loop mode:
+`healthcheck.py` fails when the last success is older than twice the interval. A sync that
+failed leaves staging and memory exactly as they were, which is the safe failure.
+
+**`ENABLE_BACKEND_ACCESS_CONTROL=false`.** On, every API call needs a user token and datasets
+are isolated per user, so the sync process and the API would have to authenticate as the same
+user for recall to see the synced dataset, and the demo graph backend's per-user isolation is
+not something this task should lean on. Off, there is one tenant, one dataset, and "both see
+the same data" holds by construction. Turning it on would add: a service user for the sync,
+token handling in `ask.sh`, and per-dataset databases in Postgres.
 
 ## Layout
 

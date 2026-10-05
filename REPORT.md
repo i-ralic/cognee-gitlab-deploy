@@ -180,5 +180,19 @@ the ontology appear. The deltas are what matter.
 sync three times on these longer documents. Root cause measured, not guessed: 2.7 GiB process
 baseline + ~250 MiB per chunk scored in one GLiNER pass, and cognee sends every chunk of a
 document in one call. `SYNC_CHUNKS_PER_BATCH=4` and the closed schema fixed it. The connector-side
-follow-up for PR 1 is a cap on rendered comment length, so that one issue with a 200-comment
-thread cannot dictate the memory limit of the whole deployment.
+follow-up landed in PR 1 as `GITLAB_MAX_CONTENT_CHARS` (default 32,000 characters, 0 = off):
+header and description first, comments oldest-first while they fit, a closing line with the
+omitted count, deterministic so the content hash stays stable. One issue with a 200-comment
+thread can no longer dictate the memory limit of the whole deployment. The numbers above were
+measured before the cap; with it, the longest document here (33 KB) loses its last comments.
+
+**Reproducibility caveat.** A few hours after the seed and mutate runs, gitlab.com blocked the
+account that owns `collabwriting-app/cognee-corpus` (every authenticated call returns
+`403 Your account has been blocked`), and the project's issues and merge requests now list as
+empty for anonymous readers, although the project page itself still resolves. The seed script
+created 19 issues, 5 branches, 5 merge requests and their comments within minutes on a fresh
+account, which is the pattern GitLab's anti-abuse checks look for `[unverified: GitLab does not
+state the reason]`. The main corpus (`inkscape/vectors/content`, sections 1 to 6) is a public
+project and reproduces as described. To re-run this appendix, seed a project under an
+established account and pace the seed script (`--sleep 5`), or run against a self-hosted
+instance via `GITLAB_URL`.

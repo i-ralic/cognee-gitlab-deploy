@@ -23,6 +23,10 @@ BASE = os.environ.get("GITLAB_URL", "https://gitlab.com").rstrip("/")
 TOKEN = os.environ.get("GITLAB_TOKEN")
 S = requests.Session()
 S.headers.update({"Accept": "application/json", **({"PRIVATE-TOKEN": TOKEN} if TOKEN else {})})
+# Pause after every write. A fresh account that creates dozens of issues, branches
+# and merge requests within minutes matches gitlab.com's anti-abuse pattern; the
+# account used for the first run of this script was blocked a few hours later.
+WRITE_SLEEP = float(os.environ.get("SEED_WRITE_SLEEP", "0"))
 
 
 def api(method, path, **kw):
@@ -32,6 +36,8 @@ def api(method, path, **kw):
             time.sleep(float(r.headers.get("Retry-After", 2**attempt)))
             continue
         r.raise_for_status()
+        if method != "GET" and WRITE_SLEEP:
+            time.sleep(WRITE_SLEEP)
         return r
     r.raise_for_status()
 
@@ -57,7 +63,13 @@ def main():
     ap.add_argument("--target", required=True)
     ap.add_argument("--issues", type=int, default=150)
     ap.add_argument("--merge-requests", type=int, default=20)
+    ap.add_argument(
+        "--sleep", type=float, default=None, help="seconds to pause after each write (default 0)"
+    )
     a = ap.parse_args()
+    if a.sleep is not None:
+        global WRITE_SLEEP
+        WRITE_SLEEP = a.sleep
     if not TOKEN:
         sys.exit("GITLAB_TOKEN with api scope is required")
 

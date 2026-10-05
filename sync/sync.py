@@ -24,7 +24,20 @@ STATE_DIR = pathlib.Path(os.environ.get("SYNC_STATE_DIR", "/cognee-storage/sync"
 # Comments need a token; allow turning them off for public read-only runs.
 INCLUDE_COMMENTS = os.environ.get("GITLAB_INCLUDE_COMMENTS", "true").lower() not in ("0", "false", "no")
 
-REMEMBER_KWARGS = {"primary_key": "id", "write_disposition": "merge", "max_rows_per_table": 0}
+# Memory, measured in this image (README "Resources"): the process sits at ~2.7 GiB once
+# cognee, torch and GLiNER are loaded, and every chunk that GLiNER scores in the same forward
+# pass adds ~250 MiB. cognee hands GLiNER up to ``chunks_per_batch`` chunks per call (default
+# 2000 = every chunk of the document) and GLiNER batches 16 of them per pass, so a 5,000-word
+# issue thread (14 chunks) needs > 6 GiB and a 5 GiB container is OOM-killed. 4 chunks per
+# call keeps the peak under 4 GiB. ``data_per_batch`` is how many documents run at once.
+DATA_PER_BATCH = int(os.environ.get("SYNC_DATA_PER_BATCH", "4") or 4)
+CHUNKS_PER_BATCH = int(os.environ.get("SYNC_CHUNKS_PER_BATCH", "4") or 4)
+CHUNK_SIZE = int(os.environ.get("SYNC_CHUNK_SIZE", "0") or 0) or None  # None = cognee's automatic size
+
+REMEMBER_KWARGS = {
+    "primary_key": "id", "write_disposition": "merge", "max_rows_per_table": 0,
+    "data_per_batch": DATA_PER_BATCH, "chunks_per_batch": CHUNKS_PER_BATCH, "chunk_size": CHUNK_SIZE,
+}
 
 
 async def run_once() -> None:

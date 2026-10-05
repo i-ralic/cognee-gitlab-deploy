@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Closed GLiNER schema for a GitLab issue/merge-request corpus about a software project.
+  OWL classes become entity types, object properties become relation types (cognee reads
+  rdfs:label for the name and rdfs:comment for the description). Keep both lists short:
+  cognee caps each at 20, and GLiNER prompts grow with every label.
+
+  Why this file exists: without it cognee probes its 30-label bank on a 3,000-word sketch of
+  every document in one unwindowed pass; on issues with long comment threads that pass
+  needs more than 5 GiB and the sync container is OOM-killed. With a schema given up front
+  the probe is skipped and extraction runs windowed (384 words), bounded memory.
+-->
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+         xmlns:owl="http://www.w3.org/2002/07/owl#"
+         xmlns="https://example.org/gitlab-corpus#">
+  <owl:Ontology rdf:about="https://example.org/gitlab-corpus"/>
+
+  <owl:Class rdf:about="https://example.org/gitlab-corpus#Person">
+    <rdfs:label>person</rdfs:label>
+    <rdfs:comment>A named human: contributor, maintainer, author, speaker, founder.</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:about="https://example.org/gitlab-corpus#Organization">
+    <rdfs:label>organization</rdfs:label>
+    <rdfs:comment>A company, foundation, sponsor, university or community group.</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:about="https://example.org/gitlab-corpus#SoftwareProject">
+    <rdfs:label>software</rdfs:label>
+    <rdfs:comment>A software project, application, library, extension or tool, e.g. Inkscape, GIMP, Blender.</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:about="https://example.org/gitlab-corpus#Release">
+    <rdfs:label>version</rdfs:label>
+    <rdfs:comment>A release or version number of a software project, e.g. 1.0.1, 0.92.</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:about="https://example.org/gitlab-corpus#Event">
+    <rdfs:label>event</rdfs:label>
+    <rdfs:comment>A conference, hackfest, meetup, contest or campaign.</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:about="https://example.org/gitlab-corpus#Location">
+    <rdfs:label>location</rdfs:label>
+    <rdfs:comment>A city, country, venue or region.</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:about="https://example.org/gitlab-corpus#Date">
+    <rdfs:label>date</rdfs:label>
+    <rdfs:comment>A calendar date, month or year.</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:about="https://example.org/gitlab-corpus#Feature">
+    <rdfs:label>feature</rdfs:label>
+    <rdfs:comment>A product feature, tool, dialog, file format or capability being discussed.</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:about="https://example.org/gitlab-corpus#Publication">
+    <rdfs:label>publication</rdfs:label>
+    <rdfs:comment>An article, blog post, newsletter, video, tutorial or social-media channel.</rdfs:comment>
+  </owl:Class>
+
+  <owl:ObjectProperty rdf:about="https://example.org/gitlab-corpus#sponsors">
+    <rdfs:label>sponsors</rdfs:label>
+    <rdfs:comment>An organization or person financially supports a project or event.</rdfs:comment>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="https://example.org/gitlab-corpus#hosts">
+    <rdfs:label>hosts</rdfs:label>
+    <rdfs:comment>An organization or location hosts an event.</rdfs:comment>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="https://example.org/gitlab-corpus#releasedOn">
+    <rdfs:label>released_on</rdfs:label>
+    <rdfs:comment>A software version is released on a date.</rdfs:comment>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="https://example.org/gitlab-corpus#worksOn">
+    <rdfs:label>works_on</rdfs:label>
+    <rdfs:comment>A person contributes to or maintains a software project or feature.</rdfs:comment>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="https://example.org/gitlab-corpus#heldIn">
+    <rdfs:label>held_in</rdfs:label>
+    <rdfs:comment>An event takes place in a location or on a date.</rdfs:comment>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="https://example.org/gitlab-corpus#memberOf">
+    <rdfs:label>member_of</rdfs:label>
+    <rdfs:comment>A person belongs to an organization or team.</rdfs:comment>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="https://example.org/gitlab-corpus#writes">
+    <rdfs:label>writes</rdfs:label>
+    <rdfs:comment>A person or organization authors a publication.</rdfs:comment>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="https://example.org/gitlab-corpus#partOf">
+    <rdfs:label>part_of</rdfs:label>
+    <rdfs:comment>A feature or version belongs to a software project.</rdfs:comment>
+  </owl:ObjectProperty>
+</rdf:RDF>

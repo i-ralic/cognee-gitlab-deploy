@@ -92,8 +92,14 @@ services:
       COGNEE_DATASET: ${COGNEE_DATASET:-gitlab_project}
       SYNC_INTERVAL_SECONDS: ${SYNC_INTERVAL_SECONDS:-0}   # 0 = run once and exit
       GITLAB_INCLUDE_COMMENTS: ${GITLAB_INCLUDE_COMMENTS:-true}
+      SYNC_DATA_PER_BATCH: ${SYNC_DATA_PER_BATCH:-4}     # documents cognified at once
+      SYNC_CHUNKS_PER_BATCH: ${SYNC_CHUNKS_PER_BATCH:-4} # chunks per GLiNER call; ~250 MiB each on top of a 2.7 GiB base
+      SYNC_CHUNK_SIZE: ${SYNC_CHUNK_SIZE:-0}             # 0 = cognee's automatic chunk size
+      # Closed GLiNER schema (see ontology/gitlab.owl for why). Unset to fall back to the label-bank probe.
+      ONTOLOGY_FILE_PATH: ${ONTOLOGY_FILE_PATH:-/app/ontology/gitlab.owl}
     volumes:
       - cognee_storage:/cognee-storage
+      - ./ontology:/app/ontology:ro
     # Healthy = the last successful sync finished within 2x the interval.
     healthcheck:
       test: ["CMD", "python", "/app/sync/healthcheck.py"]

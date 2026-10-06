@@ -1,0 +1,22 @@
+== nodes by type in this dataset
+     type      |  n  
+---------------+-----
+ Entity        | 226
+ TextSummary   |  29
+ DocumentChunk |  29
+ TextDocument  |  24
+ EntityType    |   9
+(5 rows)
+
+== totals in this dataset (edges: both ends in the dataset)
+ nodes | edges 
+-------+-------
+   317 |   890
+(1 row)
+
+== entity-entity relations in this dataset (excluding structural edges)
+ count 
+-------
+   193
+(1 row)
+

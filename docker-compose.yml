@@ -1,0 +1,149 @@
+# cognee + GitLab connector, no LLM key.
+#
+# Three services:
+#   postgres  one Postgres holds all three cognee stores: relational, pgvector, postgres_demo graph
+#   api       the published cognee image, answers /api/v1/search (recall) over the synced data
+#   sync      same image + the GitLab connector; runs remember() in the foreground, once or on an interval
+#
+# Both cognee containers share one Postgres and one model-cache volume, so a sync and a
+# recall see the same data and the ~750 MB GLiNER model downloads once.
+#
+#   docker compose up -d                 # bring the stack up (postgres + api)
+#   docker compose run --rm sync         # run one sync
+#   ./scripts/ask.sh "your question"     # ask a question
+
+x-cognee-env: &cognee-env
+  # --- no LLM key anywhere: cognee falls back to GLiNER (graph) + fastembed (embeddings)
+  # LLM_API_KEY is intentionally unset.
+  # --- one Postgres for all stores
+  DB_PROVIDER: postgres
+  DB_HOST: postgres
+  DB_PORT: "5432"
+  DB_USERNAME: cognee
+  DB_PASSWORD: ${POSTGRES_PASSWORD:-cognee}
+  DB_NAME: cognee_db
+  VECTOR_DB_PROVIDER: pgvector
+  VECTOR_DB_URL: postgresql://cognee:${POSTGRES_PASSWORD:-cognee}@postgres:5432/cognee_db
+  GRAPH_DATABASE_PROVIDER: postgres_demo
+  GRAPH_DATABASE_URL: postgresql+asyncpg://cognee:${POSTGRES_PASSWORD:-cognee}@postgres:5432/cognee_db
+  # --- single tenant: both processes act as the default user and see one dataset
+  ENABLE_BACKEND_ACCESS_CONTROL: "false"
+  # --- model caches on a shared named volume (owned by the image's uid 1000)
+  HF_HOME: /cognee-storage/models/hf
+  FASTEMBED_CACHE_PATH: /cognee-storage/models/fastembed
+  # --- dlt pipeline working dir on the shared volume (state also lives in Postgres)
+  DLT_DATA_DIR: /cognee-storage/dlt
+  TOKENIZERS_PARALLELISM: "false"
+
+services:
+  postgres:
+    # pgvector/pgvector:pg17 as pulled on 2026-10-05, pinned by digest
+    image: pgvector/pgvector@sha256:ac08538c6f8b9904c33c8224c5e5706dbe760aca29db1d096972b4052c22a75d
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: cognee
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-cognee}
+      POSTGRES_DB: cognee_db
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cognee -d cognee_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    deploy:
+      resources:
+        limits:
+          memory: 1g
+
+  api:
+    # cognee/cognee:main as pulled on 2026-10-05 (cognee 1.6.2), pinned by digest
+    image: cognee/cognee@sha256:b9c727a631222897f60de9d796190bbf0a33254afdb335a6638a2419dccc3101
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      <<: *cognee-env
+    ports:
+      - "8000:8000"
+    volumes:
+      - cognee_storage:/cognee-storage
+    # /health is the image's own HEALTHCHECK; repeated here so `compose ps` shows it.
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          # Measured idle peak 634 MiB (see README "Resources").
+          memory: ${API_MEM_LIMIT:-1g}
+
+  sync:
+    build: ./sync
+    profiles: ["sync"]            # never starts with `up`; run explicitly
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      <<: *cognee-env
+      GITLAB_URL: ${GITLAB_URL:-https://gitlab.com}
+      GITLAB_PROJECT: ${GITLAB_PROJECT:-}        # sync.py names it clearly if unset; `up -d` needs no .env
+      GITLAB_TOKEN: ${GITLAB_TOKEN:-}
+      COGNEE_DATASET: ${COGNEE_DATASET:-gitlab_project}
+      SYNC_INTERVAL_SECONDS: ${SYNC_INTERVAL_SECONDS:-0}   # 0 = run once and exit
+      GITLAB_INCLUDE_COMMENTS: ${GITLAB_INCLUDE_COMMENTS:-true}
+      SYNC_DATA_PER_BATCH: ${SYNC_DATA_PER_BATCH:-4}     # documents cognified at once
+      SYNC_CHUNKS_PER_BATCH: ${SYNC_CHUNKS_PER_BATCH:-4} # chunks per GLiNER call; ~250 MiB each on top of a 2.7 GiB base
+      SYNC_CHUNK_SIZE: ${SYNC_CHUNK_SIZE:-0}             # 0 = cognee's automatic chunk size
+      # Closed GLiNER schema (see ontology/gitlab.owl for why). Unset to fall back to the label-bank probe.
+      ONTOLOGY_FILE_PATH: ${ONTOLOGY_FILE_PATH:-/app/ontology/gitlab.owl}
+    volumes:
+      - cognee_storage:/cognee-storage
+      - ./ontology:/app/ontology:ro
+    # A job: in loop mode a crash is retried by compose, a clean exit (one-shot) is final.
+    restart: on-failure
+    # Healthy = the last successful sync of *this dataset* finished within 2x the interval.
+    # start_period covers the first sync (measured 287 s on 134 documents) so loop mode is
+    # not marked unhealthy before the first last_success file can exist.
+    healthcheck:
+      test: ["CMD", "python", "/app/sync/healthcheck.py"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 600s
+    # Measured (README "Resources"): peak 4.5 GiB with comments on and the closed schema,
+    # 3.5 GiB comments off; 3.9 cores. Limit = peak + ~10 %; reservation = the 2.7 GiB model
+    # baseline + one batch; CPU capped at the VM's 4 cores.
+    deploy:
+      resources:
+        limits:
+          memory: ${SYNC_MEM_LIMIT:-5g}
+          cpus: "${SYNC_CPUS:-4}"
+        reservations:
+          memory: ${SYNC_MEM_RESERVATION:-3g}
+
+  # Offline stand-in for gitlab.com (profile "offline", never starts with plain `up`): serves
+  # fixtures/offline-corpus.json as GitLab API v4, re-read on every request, so the
+  # edit / add / delete re-sync can be verified with no gitlab.com account. See README
+  # "Reproduce the appendix offline" and scripts/fake_gitlab.py.
+  fake-gitlab:
+    image: python:3.12-slim
+    profiles: ["offline"]
+    # --per-page-max 10 so the 24-item fixture spans three pages and the Link-header loop runs.
+    command: ["python", "/app/scripts/fake_gitlab.py", "serve", "--corpus", "/data/offline-corpus.json", "--port", "8080", "--per-page-max", "${FAKE_GITLAB_PER_PAGE_MAX:-10}"]
+    volumes:
+      - ./scripts:/app/scripts:ro
+      - ./fixtures:/data
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/api/v4/projects/1/issues?per_page=1')"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  pg_data:
+  cognee_storage:

@@ -1,0 +1,5 @@
+EDITED  issue #39 (id 17955325): Revising / Finalizing the Content Repository Wiki
+  marker: Marker 20261005-1708: the Zagreb Hackfest 2026 is hosted by Collabwriting at the Lauba hall.
+ADDED   issue #120 (id 265322632): Quokka palette for Inkscape 1.5 (20261005-1708)
+  marker: Marker 20261005-1708: the Quokka palette ships with Inkscape 1.5 and was drawn by Mira Kovac.
+DELETED issue #119 (id 186711437): Libre Graphic Meeting 2026 - Inkscape project notes

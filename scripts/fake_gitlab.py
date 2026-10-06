@@ -11,13 +11,15 @@ Three modes, standard library only (it runs in ``python:3.12-slim`` with nothing
   capture   copy a few public issues / merge requests from gitlab.com into a corpus file
             (anonymous: comments need a token on gitlab.com, so ``notes`` stay empty)
   serve     answer GET /api/v4/projects/<any>/{issues,merge_requests}[/<iid>/notes]
-            with ``state``/``order_by``/``sort`` honoured, 100 per page, ``Link: rel="next"``
-            and ``X-Total`` headers like gitlab.com; the file is re-read on every request
+            with ``state``/``order_by``/``sort``/``updated_after`` honoured, ``per_page`` capped
+            by ``--per-page-max`` (gitlab.com: 100), ``Link: rel="next"`` and ``X-Total`` headers
+            like gitlab.com; the file is re-read on every request. Not covered: notes need no
+            token here (gitlab.com needs one), no 429 is ever served, and the token is not checked.
   mutate    one edit, one add, one delete in the corpus file, each with a marker sentence
             (same markers as scripts/mutate_corpus.py, so the report's recall checks apply)
 
   python scripts/fake_gitlab.py capture --source inkscape/vectors/content --out fixtures/offline-corpus.json
-  docker compose --profile offline up -d fake-gitlab
+  docker compose --profile offline up -d fake-gitlab        # FAKE_GITLAB_PER_PAGE_MAX=10 by default
   GITLAB_URL=http://fake-gitlab:8080 GITLAB_PROJECT=1 COGNEE_DATASET=gitlab_offline docker compose run --rm sync
   python scripts/fake_gitlab.py mutate --corpus fixtures/offline-corpus.json
   GITLAB_URL=http://fake-gitlab:8080 GITLAB_PROJECT=1 COGNEE_DATASET=gitlab_offline docker compose run --rm sync
@@ -99,6 +101,7 @@ _NOTES_RE = re.compile(r"^/api/v4/projects/[^/]+/(issues|merge_requests)/(\d+)/n
 
 
 class Handler(BaseHTTPRequestHandler):
+    per_page_max = PER_PAGE_MAX
     corpus_path = "corpus.json"
 
     def log_message(self, fmt, *args):  # one line per request, to stdout
@@ -133,12 +136,16 @@ class Handler(BaseHTTPRequestHandler):
             return self._json(404, {"message": "404 Not found"})
         kind = m.group(1)
         rows = [{k: x.get(k) for k in ITEM_FIELDS} for x in corpus.get(kind, [])]
-        state = q.get("state", "opened")
+        # GitLab's default for issues/MRs is every state; the connector asks for state=all anyway.
+        state = q.get("state", "all")
         if state != "all":
             rows = [r for r in rows if r.get("state") == state]
+        updated_after = q.get("updated_after")
+        if updated_after:
+            rows = [r for r in rows if (r.get("updated_at") or "") > updated_after]
         key = q.get("order_by", "created_at")
         rows.sort(key=lambda r: r.get(key) or "", reverse=q.get("sort", "desc") == "desc")
-        per_page = max(1, min(int(q.get("per_page", 20)), PER_PAGE_MAX))
+        per_page = max(1, min(int(q.get("per_page", 20)), Handler.per_page_max))
         page = max(1, int(q.get("page", 1)))
         chunk = rows[(page - 1) * per_page : page * per_page]
         headers = {"X-Total": str(len(rows)), "X-Page": str(page), "X-Per-Page": str(per_page)}
@@ -152,6 +159,7 @@ class Handler(BaseHTTPRequestHandler):
 
 def serve(a: argparse.Namespace) -> int:
     Handler.corpus_path = a.corpus
+    Handler.per_page_max = a.per_page_max
     httpd = ThreadingHTTPServer((a.host, a.port), Handler)
     print(f"fake GitLab serving {a.corpus} on http://{a.host}:{a.port}/api/v4/ (re-read per request)", flush=True)
     try:
@@ -216,6 +224,8 @@ def main() -> int:
     s.add_argument("--corpus", required=True)
     s.add_argument("--host", default="0.0.0.0")  # noqa: S104 - container-internal
     s.add_argument("--port", type=int, default=8080)
+    s.add_argument("--per-page-max", type=int, default=PER_PAGE_MAX,
+                   help="server-side cap on per_page (gitlab.com: 100); use 10 so a small fixture paginates")
     s.set_defaults(fn=serve)
     m = sub.add_parser("mutate")
     m.add_argument("--corpus", required=True)

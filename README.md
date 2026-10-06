@@ -8,11 +8,14 @@ fastembed model. One Postgres holds all three stores. A second container runs th
 ## Three commands
 
 ```bash
-cp .env.example .env            # set GITLAB_PROJECT (and GITLAB_TOKEN for comments)
-docker compose up -d            # 1. bring the stack up: postgres + api
-docker compose run --rm sync    # 2. run a sync (re-run any time; second run is incremental)
+docker compose up -d                                   # 1. bring the stack up: postgres + api (no .env needed)
+GITLAB_PROJECT=inkscape/vectors/content docker compose run --rm sync   # 2. run a sync (re-run any time; the second run is incremental)
 ./scripts/ask.sh "Which issues mention a crash on startup?"   # 3. ask a question
 ```
+
+`GITLAB_PROJECT` is the only required setting and the sync names it if it is missing;
+`GITLAB_TOKEN` (`read_api`) adds comments and private projects. `.env.example` lists every knob
+for people who prefer a file. `ask.sh` needs `curl` and `python3` on the host.
 
 Scheduled syncs: `SYNC_INTERVAL_SECONDS=3600 docker compose --profile sync up -d sync` keeps one
 sync container looping; or put `docker compose run --rm sync` in cron. Both see the same data
@@ -49,16 +52,21 @@ image already owns as uid 1000 (a fresh volume at a custom path would be root-ow
 ~750 MB GLiNER model and the fastembed model download once, on the first sync, and the API
 reuses the same fastembed cache for query embeddings.
 
-**Resources: measured with `scripts/measure.sh`, not guessed.** First sync of 134 documents
-(117 issues + 17 merge requests, public project `inkscape/vectors/content`, comments off, VM with
-4 CPUs / 8 GB, Apple M-series): wall clock 287 s, of which 282 s inside `remember()`; the sync
-container peaked at **3.5 GiB RSS and 3.9 cores**, the API at 634 MiB (idle), Postgres at 136 MiB.
-Second sync (no changes): 13 s, sync peak 599 MiB, 0.7 cores. The GLiNER model is the memory: it
-loads once per sync process (6.4 s from the cache) and runs one batched pass per chunk batch at
-roughly 2 s per document on CPU. Limits in `docker-compose.yml`: sync 5 GiB (peak + ~40 %), API
-1 GiB, Postgres 1 GiB; CPU is left unlimited because the sync is embarrassingly parallel across
-cores and nothing else competes with it. A GPU would move the sync to seconds; nothing in the
-compose file assumes one.
+**Resources: measured with `scripts/measure.sh`, not guessed.** Two timings are quoted for every
+run: *wall clock* (`measure.sh` around `docker compose run`, including container start and model
+load) and *inside `remember()`* (what `sync.py` prints). First sync of 134 documents (117 issues +
+17 merge requests, public project `inkscape/vectors/content`, comments off, VM with 4 CPUs / 8 GB,
+Apple M-series): 287 s wall clock / 282 s inside `remember()`; the sync container peaked at
+**3.5 GiB RSS and 3.9 cores**, the API at 634 MiB (idle), Postgres at 136 MiB. Second sync (no
+changes): 13 s / 9 s, sync peak 599 MiB, 0.7 cores. Peaks are `docker stats` sampled every 5 s, so
+they are lower bounds for spikes shorter than that. API under load: a burst of 40 CHUNKS queries
+(`scripts/measure.sh` around `ask.sh`, `proof/measure_api_query.txt`) finished in 3 s with the API at
+589 MiB and 73 % of one core, so its 1 GiB limit holds with the model loaded. The GLiNER model is the memory: it loads once
+per sync process (6.4 s from the cache) and runs one batched pass per chunk batch at roughly 2 s
+per document on CPU. Limits in `docker-compose.yml` follow the measurements below (4.5 GiB peak
+with comments on): sync **5 GiB limit / 3 GiB reservation / 4 CPUs**, API 1 GiB, Postgres 1 GiB;
+`restart: unless-stopped` on postgres and api, `on-failure` on the sync job. A GPU would move the
+sync to seconds; nothing in the compose file assumes one.
 
 **Memory scales with chunks per GLiNER call, not with corpus size.** The second corpus (the
 board's seeded project, 19 issues + 5 merge requests, **comments on**, documents up to 33 KB /
@@ -85,10 +93,13 @@ relation types the first corpus lacked (`sponsors`, `released_on`) now exist. Un
 to go back to the open label bank.
 
 **Health checks.** API: the image's own `curl -f /health`. Postgres: `pg_isready`, and both
-cognee containers wait for it. Sync: "healthy" means *the last sync finished and the cursor
-advanced*. One-shot mode: exit code 0 and a `last_success.json` written by `sync.py`. Loop mode:
-`healthcheck.py` fails when the last success is older than twice the interval. A sync that
-failed leaves staging and memory exactly as they were, which is the safe failure.
+cognee containers wait for it. Sync: "healthy" means *the last sync of this dataset finished and
+the cursor advanced*. One-shot mode: exit code 0 and a `last_success.<dataset>.json` written by
+`sync.py` (keyed by dataset, so two sync containers on one volume cannot satisfy each other's
+check). Loop mode: `healthcheck.py` fails when the last success is older than twice the interval;
+`start_period: 600s` covers the measured 287 s first sync so the container is not unhealthy before
+its first success can exist. A sync that failed leaves staging and memory exactly as they were,
+which is the safe failure.
 
 **`ENABLE_BACKEND_ACCESS_CONTROL=false`.** On, every API call needs a user token and datasets
 are isolated per user, so the sync process and the API would have to authenticate as the same
@@ -99,13 +110,16 @@ token handling in `ask.sh`, and per-dataset databases in Postgres.
 
 ## Reproduce the appendix offline (no GitLab account)
 
-gitlab.com blocked the account that owned the seeded project (REPORT.md, "Reproducibility
-caveat"), so the edit / add / delete re-sync is also reproducible against a stand-in: a 230-line
-stdlib HTTP server that serves `fixtures/offline-corpus.json` as GitLab API v4 (listing with
-`state`/`order_by`/`sort`, 100 per page, `Link: rel="next"`, `X-Total`, per-item notes). The
-connector only sees a different `GITLAB_URL`; nothing in it knows about the fake. The fixture is
-19 public issues + 5 merge requests from `inkscape/vectors/content`, captured anonymously (so no
-comments: gitlab.com needs a token for notes), 31 KB of text.
+gitlab.com blocked the account that owned the seeded project (APPENDIX.md, "Reproducibility
+caveat"), so the edit / add / delete re-sync is also reproducible against a stand-in: a stdlib
+HTTP server that serves `fixtures/offline-corpus.json` as GitLab API v4 (listing with
+`state`/`order_by`/`sort`/`updated_after`, `per_page` capped at `--per-page-max` (10 in compose, so
+the 24-item fixture spans three pages and the `Link: rel="next"` loop really runs), `X-Total`,
+per-item notes). The connector only sees a different `GITLAB_URL`; nothing in it knows about the
+fake. The fixture is 19 public issues + 5 merge requests from `inkscape/vectors/content`, captured
+anonymously, 31 KB of text. **What the offline path does not cover:** comments (captured without a
+token, so `notes` are empty), 429 rate limiting (never served), and authentication (the token is
+not checked). Those three are covered by the unit tests and by the gitlab.com runs.
 
 ```bash
 docker compose --profile offline up -d fake-gitlab
@@ -117,10 +131,10 @@ docker compose run --rm sync                                       # sync 3: 0 c
 docker compose exec -T postgres psql -U cognee -d cognee_db -v ds=<dataset_id from the sync output> -f - < scripts/graph_report_dataset.sql
 ```
 
-Measured on 05.10 on this stack (lima VM, 4 CPUs / 8 GB): sync 1 41 s, peak 2.8 GiB, 353 nodes /
-991 edges in the dataset; sync 2 12 s, "Deleting 2 orphaned dlt row(s)", 316 / 887, the deleted
-issue's chunks gone, both markers present as entities with relations; sync 3 3 s, unchanged. Full
-numbers in REPORT.md → Appendix → "Re-verified offline". `git checkout fixtures/` restores the
+Measured on 05.10 on this stack (lima VM, 4 CPUs / 8 GB; wall clock): sync 1 41 s, peak 2.8 GiB,
+353 nodes / 991 edges in the dataset; sync 2 12 s, "Deleting 2 orphaned dlt row(s)", 316 / 887, the
+deleted issue's chunks gone, both markers present as entities with relations; sync 3 3 s, unchanged.
+Full numbers in APPENDIX.md D. `git checkout fixtures/` restores the
 fixture after a mutate. To refresh it: `python3 scripts/fake_gitlab.py capture --source
 inkscape/vectors/content --out fixtures/offline-corpus.json`.
 
@@ -140,5 +154,6 @@ scripts/mutate_corpus.py one edit, one add, one delete, each with a searchable m
 scripts/fake_gitlab.py   GitLab API v4 stand-in (capture / serve / mutate) for the offline reproduction
 scripts/graph_report_dataset.sql  the same counts scoped to one dataset id (graph_node.source_dataset_ids)
 fixtures/offline-corpus.json      19 public issues + 5 MRs for the stand-in (see "Reproduce the appendix offline")
-REPORT.md                Part 3: what ended up in the graph and what did not (+ appendix)
+REPORT.md                Part 3: what ended up in the graph and what did not (≤ 1,000 words)
+APPENDIX.md              corpus and method, the edit/add/delete re-sync, reproducibility caveat, offline re-run, resources
 ```

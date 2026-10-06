@@ -37,7 +37,9 @@ x-cognee-env: &cognee-env
 
 services:
   postgres:
-    image: pgvector/pgvector:pg17
+    # pgvector/pgvector:pg17 as pulled on 2026-10-05, pinned by digest
+    image: pgvector/pgvector@sha256:ac08538c6f8b9904c33c8224c5e5706dbe760aca29db1d096972b4052c22a75d
+    restart: unless-stopped
     environment:
       POSTGRES_USER: cognee
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-cognee}
@@ -55,7 +57,9 @@ services:
           memory: 1g
 
   api:
-    image: cognee/cognee:main
+    # cognee/cognee:main as pulled on 2026-10-05 (cognee 1.6.2), pinned by digest
+    image: cognee/cognee@sha256:b9c727a631222897f60de9d796190bbf0a33254afdb335a6638a2419dccc3101
+    restart: unless-stopped
     depends_on:
       postgres:
         condition: service_healthy
@@ -87,7 +91,7 @@ services:
     environment:
       <<: *cognee-env
       GITLAB_URL: ${GITLAB_URL:-https://gitlab.com}
-      GITLAB_PROJECT: ${GITLAB_PROJECT:?set GITLAB_PROJECT to group/project}
+      GITLAB_PROJECT: ${GITLAB_PROJECT:-}        # sync.py names it clearly if unset; `up -d` needs no .env
       GITLAB_TOKEN: ${GITLAB_TOKEN:-}
       COGNEE_DATASET: ${COGNEE_DATASET:-gitlab_project}
       SYNC_INTERVAL_SECONDS: ${SYNC_INTERVAL_SECONDS:-0}   # 0 = run once and exit
@@ -100,17 +104,27 @@ services:
     volumes:
       - cognee_storage:/cognee-storage
       - ./ontology:/app/ontology:ro
-    # Healthy = the last successful sync finished within 2x the interval.
+    # A job: in loop mode a crash is retried by compose, a clean exit (one-shot) is final.
+    restart: on-failure
+    # Healthy = the last successful sync of *this dataset* finished within 2x the interval.
+    # start_period covers the first sync (measured 287 s on 134 documents) so loop mode is
+    # not marked unhealthy before the first last_success file can exist.
     healthcheck:
       test: ["CMD", "python", "/app/sync/healthcheck.py"]
       interval: 60s
       timeout: 10s
       retries: 3
+      start_period: 600s
+    # Measured (README "Resources"): peak 4.5 GiB with comments on and the closed schema,
+    # 3.5 GiB comments off; 3.9 cores. Limit = peak + ~10 %; reservation = the 2.7 GiB model
+    # baseline + one batch; CPU capped at the VM's 4 cores.
     deploy:
       resources:
         limits:
-          # Measured peak 3.5 GiB on a 134-document sync (see README "Resources").
           memory: ${SYNC_MEM_LIMIT:-5g}
+          cpus: "${SYNC_CPUS:-4}"
+        reservations:
+          memory: ${SYNC_MEM_RESERVATION:-3g}
 
   # Offline stand-in for gitlab.com (profile "offline", never starts with plain `up`): serves
   # fixtures/offline-corpus.json as GitLab API v4, re-read on every request, so the
@@ -119,7 +133,8 @@ services:
   fake-gitlab:
     image: python:3.12-slim
     profiles: ["offline"]
-    command: ["python", "/app/scripts/fake_gitlab.py", "serve", "--corpus", "/data/offline-corpus.json", "--port", "8080"]
+    # --per-page-max 10 so the 24-item fixture spans three pages and the Link-header loop runs.
+    command: ["python", "/app/scripts/fake_gitlab.py", "serve", "--corpus", "/data/offline-corpus.json", "--port", "8080", "--per-page-max", "${FAKE_GITLAB_PER_PAGE_MAX:-10}"]
     volumes:
       - ./scripts:/app/scripts:ro
       - ./fixtures:/data

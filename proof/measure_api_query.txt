@@ -1,0 +1,4 @@
+wall clock: 3s
+cognee-gitlab-deploy-api-1: peak mem 589 MiB, peak cpu 73%
+cognee-gitlab-deploy-postgres-1: peak mem 52 MiB, peak cpu 4%
+cognee-obsidian-deploy-postgres-1: peak mem 64 MiB, peak cpu 0%

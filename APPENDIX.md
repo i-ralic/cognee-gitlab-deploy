@@ -131,9 +131,9 @@ documents here are short and have no comments, so GLiNER scores a handful of chu
 
 Limits in `docker-compose.yml` follow from these: sync 5 GiB limit (4.5 GiB measured peak + ~10 %) with a 3 GiB reservation (the 2.7 GiB model baseline + one batch) and 4 CPUs; API 1 GiB; Postgres 1 GiB. The API under one `ask.sh` query is measured in README "Resources".
 
-## F. Re-run on the committed, pinned image (connector `dabe353`)
+## F. Re-run on the committed, pinned image (connector `dabe353`; Dockerfile now pins `5f4a729`)
 
-The first offline run (D) used a branch tarball; after the review the Dockerfile pins the cognee image by digest and the connector by commit, and records the connector archive as an image label and as `/app/sync/CONNECTOR_ARCHIVE` (`proof/offline_dabe353/connector_commit.txt`, read back from the built image). The same three-sync sequence was repeated on that image against the fake server with `--per-page-max 10`, fresh dataset `gitlab_offline_v2`:
+The Dockerfile has since been re-pinned to the connector PR's final head `5f4a729`; the only change between `dabe353` and `5f4a729` is one test assertion (`tests/test_gitlab.py`, 4+/5−), the connector package is byte-identical, so this run stands for the pinned image. The first offline run (D) used a branch tarball; after the review the Dockerfile pins the cognee image by digest and the connector by commit, and records the connector archive as an image label and as `/app/sync/CONNECTOR_ARCHIVE` (`proof/offline_dabe353/connector_commit.txt`, read back from the built image). The same three-sync sequence was repeated on that image against the fake server with `--per-page-max 10`, fresh dataset `gitlab_offline_v2`:
 
 | | Sync 1 | `fake_gitlab.py mutate` | Sync 2 | Sync 3 |
 |---|---|---|---|---|

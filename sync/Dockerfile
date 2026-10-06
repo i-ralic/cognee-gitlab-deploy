@@ -5,7 +5,7 @@ FROM cognee/cognee@sha256:b9c727a631222897f60de9d796190bbf0a33254afdb335a6638a24
 
 # Commit tarball, not git+https (the image has no git) and not a branch (branches move); one repo
 # name throughout: the connector PR lives in i-ralic/cognee-community.
-ARG CONNECTOR_ARCHIVE=https://github.com/i-ralic/cognee-community/archive/dabe353729e96acf41485396e05339c8c203d9c1.tar.gz
+ARG CONNECTOR_ARCHIVE=https://github.com/i-ralic/cognee-community/archive/5f4a7290323ed525fbf51cd16aa294d7d9f84798.tar.gz
 # The package version (0.1.0) does not change between connector commits, so the image records the
 # archive it was built from: as a label and as a file the proof can read back.
 LABEL org.opencontainers.image.source="https://github.com/i-ralic/cognee-gitlab-deploy" \

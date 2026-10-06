@@ -23,7 +23,7 @@ appendix used the closed `ontology/gitlab.owl`.
 |---|---|---|---|
 | inkscape | Entity | 162 | Meaningful: in almost every document (81 `contains`, 21 `uses`, 17 `part_of`). |
 | person, organization, concept, software, date, document, event, technology | EntityType | 117 · 104 · 100 · 97 · 82 · 77 · 74 · 72 | Structural: one `is_a` edge per entity. Correct as types, noise for navigation; `concept` is a dumping ground ("headings", "momentum"). |
-| twitter | Entity | 64 | Half meaningful: 51 of 64 edges come from the "Publication Channels" checklist most issues carry; it says nothing about any issue. |
+| twitter | Entity | 64 | Half meaningful: 51 of 64 edges come from the "Publication Channels" checklist most issues carry. |
 
 Eight of ten hubs are type nodes, an artefact of modelling `is_a` as edges; among real entities
 `inkscape` and `twitter` lead, then `website` and the two most active authors.
@@ -62,7 +62,7 @@ Pattern: three of five errors come from the **document header I render** (`Autho
   published" is not a graph question.
 - **Comments.** Off in this run (token).
 - **Identity.** `inkscape`, `inkscape project`, `inkscape vectors team` are separate nodes;
-  `moini`/`Moini`, `crogers`/`christopher rogers` are not merged, so the degrees undercount hubs.
+  `moini`/`Moini` are not merged, so the degrees undercount the hubs.
 
 ## 5. Three questions the graph can answer and three it cannot
 
@@ -76,11 +76,11 @@ All via `POST /api/v1/search`, `searchType: CHUNKS`, `topK: 5` (`scripts/ask.sh`
 
 **Not answered**
 
-4. *How many issues are still open?* → five unrelated closed issues; `state` is not in the graph and nothing counts.
+4. *How many issues are still open?* → five unrelated closed issues; `state` is not in the graph.
 5. *Who are the four original founders of Inkscape?* → the right article at chunk 1, but the naming sentence is in a later chunk; the graph has `collaborates_with` but no `founder_of`.
 6. *Which merge requests changed the bug migration badges?* → the right MR, but only by title words; no node for the file or the change. A text match, not a graph answer.
 
-`GRAPH_COMPLETION` needs an LLM key; `CYPHER` is not supported by `postgres_demo`.
+`GRAPH_COMPLETION` needs an LLM key; `CYPHER` is not available on `postgres_demo`.
 
 ## 6. The one change I would make first
 

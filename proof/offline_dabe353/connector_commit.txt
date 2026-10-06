@@ -1,0 +1,4 @@
+# read back from the built image
+io.cognee.connector.archive=https://github.com/i-ralic/cognee-community/archive/dabe353729e96acf41485396e05339c8c203d9c1.tar.gz
+org.opencontainers.image.source=https://github.com/i-ralic/cognee-gitlab-deploy
+/app/sync/CONNECTOR_ARCHIVE=https://github.com/i-ralic/cognee-community/archive/dabe353729e96acf41485396e05339c8c203d9c1.tar.gz

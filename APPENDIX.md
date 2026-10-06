@@ -130,3 +130,16 @@ documents here are short and have no comments, so GLiNER scores a handful of chu
 | Offline stand-in, sync 1 / 2 / 3 | 24 / 2+1 / 0 | 41 s / 12 s / 3 s | 2.8 GiB / 0.8 GiB / 0.15 GiB | |
 
 Limits in `docker-compose.yml` follow from these: sync 5 GiB limit (4.5 GiB measured peak + ~10 %) with a 3 GiB reservation (the 2.7 GiB model baseline + one batch) and 4 CPUs; API 1 GiB; Postgres 1 GiB. The API under one `ask.sh` query is measured in README "Resources".
+
+## F. Re-run on the committed, pinned image (connector `dabe353`)
+
+The first offline run (D) used a branch tarball; after the review the Dockerfile pins the cognee image by digest and the connector by commit, and records the connector archive as an image label and as `/app/sync/CONNECTOR_ARCHIVE` (`proof/offline_dabe353/connector_commit.txt`, read back from the built image). The same three-sync sequence was repeated on that image against the fake server with `--per-page-max 10`, fresh dataset `gitlab_offline_v2`:
+
+| | Sync 1 | `fake_gitlab.py mutate` | Sync 2 | Sync 3 |
+|---|---|---|---|---|
+| Connector log | Issue 19 + MR 5 changed, 0 deleted | edit #39, add #120, delete #119 | **Issue: 2 changed, 1 deleted** | 0 changed, 0 deleted |
+| cognee | | | "Deleting 2 orphaned dlt row(s)" | |
+| Inside `remember()` | 39.8 s | | 8.3 s | 2.1 s |
+| Nodes / edges (dataset-scoped, after sync 3) | | | | 317 / 890 |
+
+The fake server's request log (`fake_requests_sync1.txt`) shows the listing paged (`order_by=created_at&sort=asc&per_page=10&page=2`), so the `Link: rel="next"` loop ran in this proof. Logs: `proof/offline_dabe353/sync{1,2,3}.log`, `mutate.txt`, `sql_dataset_after_sync3.txt`.

@@ -1,0 +1,4 @@
+2026-10-06T00:08:24.223368 [info     ] GitLab: Merge request: 0 changed, 0 deleted. [gitlab_connector]
+2026-10-06T00:08:24.224756 [info     ] GitLab: Issue: 2 changed, 1 deleted. [gitlab_connector]
+2026-10-06T00:08:24.638681 [info     ] Deleting 2 orphaned dlt row(s) from dataset 'gitlab_offline_v2'. [resolve_dlt_sources]
+sync ok in 9s: RememberResult(status='completed', dataset='gitlab_offline_v2', dataset_id='2eb27169-f346-5f0b-9b7a-a39bbc36f7cd', pipeline_run_id='c1b8d9b1-cdc8-4e37-9872-8c9f280bdaea', items=24, elapsed=8.3s, improve='skipped')

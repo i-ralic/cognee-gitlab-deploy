@@ -140,9 +140,11 @@ class Handler(BaseHTTPRequestHandler):
         state = q.get("state", "all")
         if state != "all":
             rows = [r for r in rows if r.get("state") == state]
+        # GitLab's updated_after is inclusive ("updated on or after the given time"), so a
+        # same-second item is returned and the connector's known_ids tie handling is exercised.
         updated_after = q.get("updated_after")
         if updated_after:
-            rows = [r for r in rows if (r.get("updated_at") or "") > updated_after]
+            rows = [r for r in rows if (r.get("updated_at") or "") >= updated_after]
         key = q.get("order_by", "created_at")
         rows.sort(key=lambda r: r.get(key) or "", reverse=q.get("sort", "desc") == "desc")
         per_page = max(1, min(int(q.get("per_page", 20)), Handler.per_page_max))
